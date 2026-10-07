@@ -1,0 +1,378 @@
+{
+ "data": {
+  "isMoreThan30DaysAllowed": false,
+  "jobAdEInterviewQuestions": [],
+  "jobAdTranslations": [
+   {
+    "id": "aab9b03d-bf96-4c52-a764-6dea55e1f6a6",
+    "title": "Skladiščnik (m/ž) TC MERKUR Murska Sobota",
+    "dateCreated": "2026-09-25T12:59:13.760Z",
+    "dateUpdated": "2026-09-25T13:10:47.808Z",
+    "jobDescription": "<ul><li><p>prevzem, komisioniranje in izdaja blaga in materiala</p></li><li><p>skrb za urejenost skladišča</p></li><li><p>manipulacija z viličarjem</p></li></ul><p></p>",
+    "weOffer": "<ul><li><p>zaposlitev za nedoločen čas s 6-mesečno poskusno dobo</p></li><li><p>delo v dveh izmenah</p></li><li><p>redno plačilo</p></li><li><p>nagrajevanje delovne uspešnosti</p></li><li><p>možnost izobraževanj</p></li><li><p>urejeno delovno okolje</p></li><li><p>pozornost ob praznikih (božič, pust, dan žena in dan mučenikov)</p></li><li><p>ob rojstnem dnevu podarimo 2 uri</p></li><li><p>kolektivno zdravstveno zavarovanje Specialisti</p></li><li><p>obdarovanje otrok (paket za bodoče starše, paket za prvošolčke, Božiček za otroke zaposlenih)</p></li><li><p>MERKURjev piknik</p></li><li><p>številne druge MERKURjeve ugodnosti za zaposlene</p></li><li><p>brezplačni parkirni prostor</p></li></ul><p></p>",
+    "weExpect": "<ul><li><p>opravljen izpit za voznika viličarja je prednost</p></li><li><p>naravnanost za delo v skladišču in s strankami, ki zahteva večjo mero samoiniciativnosti in komunikacijskih sposobnosti</p></li><li><p>zaželene so delovne izkušnje v maloprodajni ali skladiščni dejavnosti (niso pa pogoj)</p></li><li><p>osnovno znanje računalniških programov (Word, Excel, Outlook)</p></li><li><p>potrdilo o nekaznovanosti</p></li></ul><p></p><p>Pošlji nam prijavo s priloženim življenjepisom s klikom na povezavo do 11.10.2026.</p><p></p>",
+    "aboutTheCompany": null,
+    "waysToApply": null,
+    "adSummary": "Zaposlitev za nedoločen čas.",
+    "graphicAdSummary": null,
+    "languageTaxonomyId": "4ba92d15-49c1-4aab-97f3-86ede9dcf237",
+    "promoImageId": null,
+    "promoImage": null,
+    "templateId": "f2e7adff-5335-4772-b3f7-bd452f116e27",
+    "template": {
+     "id": "f2e7adff-5335-4772-b3f7-bd452f116e27",
+     "name": "MERKUR trgovina, d.o.o. - splošni ",
+     "templateLayoutName": "Custom-Layout",
+     "style": null,
+     "layoutSections": {
+      "mobile": {
+       "customHtml": "<meta charset=\"UTF-8\" />\n\n<style>\n  @import url(\"https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap\");\n\n  #tplContainer {\n    width: 100%;\n    margin: 0 auto;\n    padding: 0;\n    font-family: \"Manrope\", Arial, Helvetica, sans-serif;\n    font-size: 16px;\n    line-height: 1.4;\n    color: #1c1f21;\n    background: #ffffff;\n    text-align: left;\n    border: 1px solid #e5e5e5;\n    border-radius: 14px;\n    overflow: hidden;\n  }\n  /* NASLOVI */\n\n  #tplContainer h2 {\n    margin: 0;\n    padding: 10px 0;\n    font: 32px Arial, Helvetica, sans-serif;\n    line-height: normal;\n    text-align: center;\n    font-weight: bold;\n    color: #00a651;\n  }\n  #tplContainer h3 {\n    margin: 0;\n    padding: 18px 0 5px;\n    font-size: 20px;\n    line-height: 1.3;\n    font-weight: 800;\n    color: #1c1f21;\n  }\n  #tplContainer h4 {\n    margin: 0;\n    padding: 0 0 18px;\n    font-size: 18px;\n    line-height: 1.45;\n    text-align: center;\n    font-weight: 700;\n    color: #3b3b3b;\n  }\n  #tplContainer h5 {\n    margin: 0;\n    padding: 0 0 18px;\n    font-size: 17px;\n    line-height: 1.45;\n    text-align: center;\n    font-weight: 600;\n    color: #555;\n  }\n  /* BESEDILO */\n\n  #tplContainer p {\n    margin: 0;\n    padding: 0 0 12px;\n  }\n  #tplContainer a {\n    color: #00a651;\n    text-decoration: underline;\n    font-weight: 700;\n  }\n  #tplContainer a:hover {\n    text-decoration: none;\n  }\n  #tplContainer ul {\n    margin: 0 0 12px;\n    padding: 0;\n    list-style: none;\n  }\n  #tplContainer ul li {\n    position: relative;\n    margin: 0;\n    padding: 0 0 0 25px;\n    line-height: 1.6;\n  }\n  #tplContainer ul li:before {\n    content: \"\";\n    position: absolute;\n    left: 5px;\n    top: 50%;\n    width: 8px;\n    height: 8px;\n    background: #00a651;\n    border-radius: 50%;\n    transform: translateY(-50%);\n  }\n  #tplContainer ul li p {\n    margin: 0;\n    padding: 0;\n    line-height: 1.6;\n  }\n  #tplContainer ul li + li {\n    margin-top: 6px;\n  }\n  #tplContainer ul li ul {\n    margin-top: 6px;\n    padding-left: 8px;\n  }\n  #tplContainer ul li ul li {\n    padding-left: 20px;\n    line-height: 1.6;\n  }\n  #tplContainer ul li ul li:before {\n    width: 6px;\n    height: 6px;\n    background: #888;\n    left: 4px;\n    top: 0.8em;\n  }\n  #tplContainer hr {\n    border: 0;\n    height: 1px;\n    background: #00a651;\n    margin: 15px 0;\n  }\n  .tplCntnAdTop {\n    margin: 0;\n    padding: 0;\n  }\n  .tplCntnAdTop img {\n    display: block;\n    width: 100%;\n    height: auto;\n  }\n  .tplCntnAdAC {\n    margin: 0;\n    padding: 25px 20px;\n    background: #00a651;\n    color: #ffffff;\n    text-align: left;\n  }\n  .tplCntnAdAC h2,\n  .tplCntnAdAC h3,\n  .tplCntnAdAC h4,\n  .tplCntnAdAC h5 {\n    color: #ffffff;\n  }\n  .tplCntnAdCon {\n    margin: 0;\n    padding: 25px 20px 30px;\n  }\n  /* MOBILE */\n\n  @media only screen and (max-width: 700px) {\n    #tplContainer {\n      border-radius: 0;\n      border-left: 0;\n      border-right: 0;\n      font-size: 15px;\n    }\n    #tplContainer h2 {\n      font-size: 24px;\n      padding: 10px 0;\n    }\n    #tplContainer h3 {\n      font-size: 19px;\n      padding-top: 15px;\n    }\n    #tplContainer h4 {\n      font-size: 16px;\n      padding-bottom: 15px;\n    }\n    #tplContainer h5 {\n      font-size: 16px;\n      padding-bottom: 15px;\n    }\n    .tplCntnAdAC {\n      padding: 20px 25px;\n    }\n    .tplCntnAdCon {\n      padding: 20px 25px 25px;\n    }\n    #tplContainer p {\n      padding-bottom: 10px;\n    }\n    #tplContainer ul {\n      margin-bottom: 10px;\n    }\n    #tplContainer ul li {\n      padding-top: 2px;\n      padding-bottom: 2px;\n      padding-left: 23px;\n    }\n  }\n</style>\n\n<div id=\"tplContainer\">\n  <div class=\"tplCntnAdTop\">\n    <img\n      src=\"https://api.mojedelo.com/uploaded-files/assets/templates/png/2025/3/31/948a8858-3f01-401c-96d2-f96e294daef9.png\"\n    />\n\n    <img\n      src=\"https://api.mojedelo.com/uploaded-files/assets/templates/jpg/2025/3/31/33e21a2c-7cca-442d-8b58-bac99db7279e.jpg\"\n    />\n  </div>\n\n  <div class=\"tplCntnAdAC\">\n    <p>\n      V MERKURju ustvarjamo spodbudno delovno okolje, kar sporočajo tudi na&scaron;i osnovni\n      principi delovanja. OSREDOTOČENI smo na na&scaron;e zaposlene, na na&scaron;e kupce in na\n      izvajanje nalog. Pri svojem delu smo ODGOVORNI &ndash; tako na delovnem mestu, kot tudi doma.\n      Skrbimo in ustvarjamo pogoje za lažje usklajevanje poklicnega in zasebnega življenja. Zavedamo\n      se, da smo si med seboj različni, kar pozdravljamo z nasmehom. Smo PRISTNI in spodbujamo\n      povratno informacijo na vseh nivojih poslovanja. Dobrodo&scaron;li v MERKURju &ndash;\n      največjem tehničnem trgovcu v Sloveniji. Ker verjamemo, da smo lahko skupaj &scaron;e\n      bolj&scaron;i.\n    </p>\n  </div>\n\n  <div class=\"tplCntnAdCon\">\n    [JOBABOUTCOMPANY]\n    <h2>[TITLE]</h2>\n\n    <h3>Tvoji dnevni izzivi bodo:</h3>\n    [JOBDESCRIPTION]\n\n    <h3>Kaj ponujamo</h3>\n    [JOBOFFERING]\n\n    <h3>Zahteve delovnega mesta</h3>\n    [JOBEXPECTATION] [WAYSTOAPPLY]\n  </div>\n</div>\n"
+      },
+      "desktop": {
+       "customHtml": "<meta charset=\"UTF-8\" />\n\n<style>\n  @import url(\"https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap\");\n\n  #tplContainer {\n    width: 100%;\n    margin: 0 auto;\n    padding: 0;\n    font-family: \"Manrope\", Arial, Helvetica, sans-serif;\n    font-size: 17px;\n    line-height: 1.4;\n    color: #1c1f21;\n    background: #ffffff;\n    text-align: left;\n    border: 1px solid #e5e5e5;\n    border-radius: 14px;\n    overflow: hidden;\n  }\n  #tplContainer h2 {\n    margin: 0;\n    padding: 10px 0;\n    font: 32px Arial, Helvetica, sans-serif;\n    line-height: normal;\n    text-align: center;\n    font-weight: bold;\n    color: #00a651;\n  }\n  #tplContainer h3 {\n    margin: 0;\n    padding: 18px 0 5px;\n    font-size: 22px;\n    line-height: 1.3;\n    font-weight: 800;\n    color: #1c1f21;\n  }\n  #tplContainer h4 {\n    margin: 0;\n    padding: 0 0 18px;\n    font-size: 18px;\n    line-height: 1.45;\n    text-align: center;\n    font-weight: 700;\n    color: #3b3b3b;\n  }\n  #tplContainer h5 {\n    margin: 0;\n    padding: 0 0 18px;\n    font-size: 17px;\n    line-height: 1.45;\n    text-align: center;\n    font-weight: 600;\n    color: #555;\n  }\n  #tplContainer p {\n    margin: 0;\n    padding: 0 0 12px;\n  }\n  #tplContainer a {\n    color: #00a651;\n    text-decoration: underline;\n    font-weight: 700;\n  }\n  #tplContainer a:hover {\n    text-decoration: none;\n  }\n  #tplContainer ul {\n    margin: 0 0 12px;\n    padding: 0;\n    list-style: none;\n  }\n  #tplContainer ul li {\n    position: relative;\n    margin: 0;\n    padding: 0 0 0 25px;\n    line-height: 1.6;\n  }\n  #tplContainer ul li:before {\n    content: \"\";\n    position: absolute;\n    left: 5px;\n    top: 50%;\n    width: 8px;\n    height: 8px;\n    background: #00a651;\n    border-radius: 50%;\n    transform: translateY(-50%);\n  }\n  #tplContainer ul li p {\n    margin: 0;\n    padding: 0;\n    line-height: 1.6;\n  }\n  #tplContainer ul li + li {\n    margin-top: 6px;\n  }\n  #tplContainer ul li ul {\n    margin-top: 6px;\n    padding-left: 8px;\n  }\n  #tplContainer ul li ul li {\n    padding-left: 20px;\n    line-height: 1.6;\n  }\n  #tplContainer ul li ul li:before {\n    width: 6px;\n    height: 6px;\n    background: #888;\n    left: 4px;\n    top: 0.8em;\n  }\n  #tplContainer hr {\n    border: 0;\n    height: 1px;\n    background: #00a651;\n    margin: 15px 0;\n  }\n  .tplCntnAdTop {\n    margin: 0;\n    padding: 0;\n  }\n  .tplCntnAdTop img {\n    display: block;\n    width: 100%;\n    height: auto;\n  }\n  .tplCntnAdAC {\n    margin: 0;\n    padding: 25px 80px;\n    background: #00a651;\n    color: #ffffff;\n    text-align: left;\n  }\n  .tplCntnAdAC h2,\n  .tplCntnAdAC h3,\n  .tplCntnAdAC h4,\n  .tplCntnAdAC h5 {\n    color: #ffffff;\n  }\n  .tplCntnAdCon {\n    margin: 0;\n    padding: 25px 80px 30px;\n  }\n  /* MOBILE */\n\n  @media only screen and (max-width: 700px) {\n    #tplContainer {\n      border-radius: 0;\n      border-left: 0;\n      border-right: 0;\n      font-size: 15px;\n    }\n    #tplContainer h2 {\n      font-size: 24px;\n      padding: 10px 0;\n    }\n    #tplContainer h3 {\n      font-size: 19px;\n      padding-top: 15px;\n    }\n    #tplContainer h4 {\n      font-size: 16px;\n      padding-bottom: 15px;\n    }\n    #tplContainer h5 {\n      font-size: 16px;\n      padding-bottom: 15px;\n    }\n    .tplCntnAdAC {\n      padding: 20px 25px;\n    }\n    .tplCntnAdCon {\n      padding: 20px 25px 25px;\n    }\n    #tplContainer p {\n      padding-bottom: 10px;\n    }\n    #tplContainer ul {\n      margin-bottom: 10px;\n    }\n    #tplContainer ul li {\n      padding-top: 2px;\n      padding-bottom: 2px;\n      padding-left: 23px;\n    }\n  }\n</style>\n\n<div id=\"tplContainer\">\n  <div class=\"tplCntnAdTop\">\n    <img\n      src=\"https://api.mojedelo.com/uploaded-files/assets/templates/png/2025/3/31/948a8858-3f01-401c-96d2-f96e294daef9.png\"\n    />\n\n    <img\n      src=\"https://api.mojedelo.com/uploaded-files/assets/templates/jpg/2025/3/31/33e21a2c-7cca-442d-8b58-bac99db7279e.jpg\"\n    />\n  </div>\n\n  <div class=\"tplCntnAdAC\">\n    <p>\n      V MERKURju ustvarjamo spodbudno delovno okolje, kar sporočajo tudi na&scaron;i osnovni\n      principi delovanja. OSREDOTOČENI smo na na&scaron;e zaposlene, na na&scaron;e kupce in na\n      izvajanje nalog. Pri svojem delu smo ODGOVORNI &ndash; tako na delovnem mestu, kot tudi doma.\n      Skrbimo in ustvarjamo pogoje za lažje usklajevanje poklicnega in zasebnega življenja. Zavedamo\n      se, da smo si med seboj različni, kar pozdravljamo z nasmehom. Smo PRISTNI in spodbujamo\n      povratno informacijo na vseh nivojih poslovanja. Dobrodo&scaron;li v MERKURju &ndash;\n      največjem tehničnem trgovcu v Sloveniji. Ker verjamemo, da smo lahko skupaj &scaron;e\n      bolj&scaron;i.\n    </p>\n  </div>\n\n  <div class=\"tplCntnAdCon\">\n    [JOBABOUTCOMPANY]\n    <h2>[TITLE]</h2>\n\n    <h3>Tvoji dnevni izzivi bodo:</h3>\n    [JOBDESCRIPTION]\n\n    <h3>Kaj ponujamo</h3>\n    [JOBOFFERING]\n\n    <h3>Zahteve delovnega mesta</h3>\n    [JOBEXPECTATION] [WAYSTOAPPLY]\n  </div>\n</div>\n"
+      }
+     },
+     "languageTaxonomyId": "4ba92d15-49c1-4aab-97f3-86ede9dcf237"
+    },
+    "languageTaxonomy": {
+     "id": "4ba92d15-49c1-4aab-97f3-86ede9dcf237",
+     "name": "Slovenščina",
+     "isoLanguageCode": "SLV"
+    }
+   }
+  ],
+  "id": "14416613-0c78-4ff3-a127-6c1ce12d5088",
+  "title": "Skladiščnik (m/ž) TC MERKUR Murska Sobota",
+  "adSummary": "Zaposlitev za nedoločen čas.",
+  "startDate": "2026-09-24T22:00:00.000Z",
+  "endDate": "2026-10-11T21:59:59.999Z",
+  "repostingDate": null,
+  "repostingDates": [],
+  "dateCreated": "2026-09-25T12:59:13.760Z",
+  "dateUpdated": "2026-09-25T13:14:00.017Z",
+  "aboutTheCompany": "<p></p><h3><strong><img src=\"https://api.mojedelo.com/uploaded-files/public/png/2025/4/23/b6e47a5ab65f4b42803b708a5e4c1436.png\n\" height=\"38\" width=\"38\" title=\"zaposlitev\"> SPLOŠNO O PODJETJU</strong></h3>\n\nMERKUR trgovina d.o.o. je vodilno slovensko podjetje za prodajo izdelkov za dom, vrt in delavnico s 24 trgovskimi centri in uspešno spletno trgovino.<div><br>&nbsp;\n\n<h3><strong><img src=\"https://api.mojedelo.com/uploaded-files/public/png/2025/4/23/4df58099be1e42929bb951546d4b0655.png\n\" height=\"38\" width=\"38\" title=\"zaposlitev\">&nbsp;NAŠA VIZIJA IN CILJI</strong></h3>\n\nMERKUR trgovina d.o.o., ustanovljena leta 1896, je postala prepoznavna blagovna znamka v Sloveniji. Vizija podjetja je ohranjanje vodilne pozicije na področju prodaje izdelkov za dom, vrt in delavnico. Cilji podjetja so osredotočeni na nenehno izboljševanje kakovosti storitev, uvajanje inovacij in zagotavljanje odlične izkušnje za stranke. MERKUR se ponaša z najboljšo spletno trgovino za dom in vrt po izboru kupcev in programom zvestobe MERKUR Zate, ki nagrajuje lojalnost. Poleg tega si podjetje prizadeva širiti svojo prisotnost in izboljševati svoje storitve v vseh 24 trgovskih centrih, kar omogoča, da ostane korak pred konkurenco in zadovolji potrebe svojih kupcev.</div><div><br><h3><strong><img src=\"https://api.mojedelo.com/uploaded-files/public/png/2025/4/23/7b86ab9f383f411e88af532667d8fbfc.png\n\" height=\"38\" width=\"38\" title=\"zaposlitev\"> ORGANIZACIJSKA KULTURA IN KLIMA</strong></h3>\n\nV MERKURju ustvarjamo spodbudno delovno okolje, ki temelji na naših osnovnih principih delovanja. OSREDOTOČENI smo na zaposlene, kupce in izvajanje nalog, kar omogoča učinkovito in zadovoljno delovno silo. Naši zaposleni so ODGOVORNI tako na delovnem mestu kot tudi doma, kar krepi zaupanje in integriteto. Skrbimo za lažje usklajevanje poklicnega in zasebnega življenja, kar prispeva k boljši produktivnosti in zadovoljstvu zaposlenih. Raznolikost med nami pozdravljamo z nasmehom, saj verjamemo, da ravno to prispeva k ustvarjalnemu delovnemu okolju. Smo PRISTNI in spodbujamo povratno informacijo na vseh nivojih poslovanja, kar zagotavlja odprto komunikacijo in nenehno izboljševanje.<p></p></div>",
+  "waysToApply": null,
+  "companyUserCreationStep": "finished",
+  "jobAdAdditionalFeatures": [],
+  "graphicAdSummary": null,
+  "jobDescription": "<ul><li><p>prevzem, komisioniranje in izdaja blaga in materiala</p></li><li><p>skrb za urejenost skladišča</p></li><li><p>manipulacija z viličarjem</p></li></ul><p></p>",
+  "promoImage": {
+   "id": null,
+   "originalName": null,
+   "mimeType": null,
+   "domain": null,
+   "destination": null,
+   "fileName": null,
+   "path": null,
+   "size": null,
+   "height": null,
+   "width": null,
+   "type": null,
+   "status": null,
+   "parentId": null,
+   "url": null
+  },
+  "jobLocation": "slovenia",
+  "jobLocationInput": null,
+  "probationPeriod": 6,
+  "status": "published",
+  "url": "https://merkur-hr-gecko.my.site.com/recruitment/s/?jobid=a0ZWy000001sQ8D",
+  "weExpect": "<ul><li><p>opravljen izpit za voznika viličarja je prednost</p></li><li><p>naravnanost za delo v skladišču in s strankami, ki zahteva večjo mero samoiniciativnosti in komunikacijskih sposobnosti</p></li><li><p>zaželene so delovne izkušnje v maloprodajni ali skladiščni dejavnosti (niso pa pogoj)</p></li><li><p>osnovno znanje računalniških programov (Word, Excel, Outlook)</p></li><li><p>potrdilo o nekaznovanosti</p></li></ul><p></p><p>Pošlji nam prijavo s priloženim življenjepisom s klikom na povezavo do 11.10.2026.</p><p></p>",
+  "weOffer": "<ul><li><p>zaposlitev za nedoločen čas s 6-mesečno poskusno dobo</p></li><li><p>delo v dveh izmenah</p></li><li><p>redno plačilo</p></li><li><p>nagrajevanje delovne uspešnosti</p></li><li><p>možnost izobraževanj</p></li><li><p>urejeno delovno okolje</p></li><li><p>pozornost ob praznikih (božič, pust, dan žena in dan mučenikov)</p></li><li><p>ob rojstnem dnevu podarimo 2 uri</p></li><li><p>kolektivno zdravstveno zavarovanje Specialisti</p></li><li><p>obdarovanje otrok (paket za bodoče starše, paket za prvošolčke, Božiček za otroke zaposlenih)</p></li><li><p>MERKURjev piknik</p></li><li><p>številne druge MERKURjeve ugodnosti za zaposlene</p></li><li><p>brezplačni parkirni prostor</p></li></ul><p></p>",
+  "company": {
+   "id": "bf2bb332-3026-4eea-9c54-263edb464651",
+   "name": "MERKUR trgovina, d.o.o.",
+   "description": "MERKUR trgovina, d.o.o., je vodilni slovenski trgovec z izdelki za opremo doma, vrta in delavnice, za končne kupce, podjetja in obrtnike. Nadaljujemo z več kot 120-letno tradicijo uspešnega poslovanja in s svežimi idejami utiramo pot v prihodnost. Odlikujejo nas zavzetost, kompetentnost, strokovnost in timsko zasledovanje ciljev. Smo vesten, resen in zanesljiv poslovni partner ter gradimo na prepoznavno dobrih storitvah. Odzivnost na spremembe okolja in trga je stalnica, iskanje še boljših priložnosti pa misel vseh zaposlenih.",
+   "portfolio": null,
+   "isTopCompany": false,
+   "isBiziSiHidden": false,
+   "industry": null,
+   "town": {
+    "id": "8e3a5e5b-246f-4635-a36f-4b1b5952a433",
+    "name": "Naklo",
+    "translation": "Naklo",
+    "municipality": "Naklo"
+   },
+   "country": {
+    "id": "04918cba-37dd-452e-b018-ab9411354123",
+    "name": "Slovenia",
+    "translation": "Slovenija"
+   },
+   "websites": [
+    {
+     "id": "f87cf25b-add8-46d6-beee-019f57c8c0af",
+     "url": "http://www.merkur.si/"
+    }
+   ],
+   "welcomeMessages": [],
+   "logotype": {
+    "id": "a1d4112c-d1ff-4aeb-be81-947be84bce73",
+    "originalName": "MERKUR trgovina.png",
+    "url": "https://api.mojedelo.com/uploaded-files/private/png/2025/8/6/f7fbca1e-3d65-48cc-a2cb-992481919688.png"
+   },
+   "coverImage": {
+    "id": "b76952be-2da3-462e-83e9-4aea8bd4f88d",
+    "originalName": "6a267903dd5f4560b9788b88ecf2ef10.png",
+    "url": "https://api.mojedelo.com/./uploaded-files/public/png/2004/11/4/6a267903dd5f4560b9788b88ecf2ef10.png"
+   },
+   "videos": [],
+   "employmentInformationWhatWeExpect": null,
+   "employmentInformationWhatWeOffer": null,
+   "employmentInformationCustomTextHtml": "<p></p><h3><strong><img src=\"https://api.mojedelo.com/uploaded-files/public/png/2025/4/23/4263e1d04d8f48718e3aaddf3cf234e4.png\n\" height=\"38\" width=\"38\" title=\"zaposlitev\"> KAJ PRIČAKUJEMO OD NOVIH SODELAVCEV </strong></h3>\n\nOd novih sodelavcev pričakujemo, da se bodo poistovetili z MERKURjevo kulturo in obogatili našo ekipo s svojo osebnostjo, znanjem ter izkušnjami. Želimo, da so OSREDOTOČENI tako na svoje delo in kupce, ODGOVORNI na delovnem mestu in doma, kar krepi zaupanje ter integriteto. Nazadnje pa stavimo tudi na njihovo PRISTNOST, zato spodbujamo povratno informacijo na vseh nivojih poslovanja in želimo, da jo uporabljajo tudi pri svojem delu.<div><br>&nbsp;\n\n<h3><strong><img src=\"https://api.mojedelo.com/uploaded-files/public/png/2025/4/23/1f33522066514bc094e91ec03ce5353c.png\n\" height=\"38\" width=\"38\" title=\"zaposlitev\"> KAJ PONUJAMO SVOJIM SODELAVCEM? </strong></h3><div><strong><br></strong></div>\n\nSpoznaj MERKURjeve ugodnosti:&nbsp;<div><ul><li>nagrajevanje delovne uspešnosti&nbsp;</li><li>možnost izobraževanj&nbsp;</li><li>urejeno delovno okolje&nbsp;</li><li>pozornost ob praznikih (božič, pust, dan žena in dan mučenikov)&nbsp;</li><li>ob rojstnem dnevu podarimo 2 uri&nbsp;</li><li>kolektivno zdravstveno zavarovanje Specialisti&nbsp;</li><li>obdarovanje otrok (paket za bodoče starše, paket za prvošolčke, Božiček za otroke zaposlenih)</li><li>brezplačni parking&nbsp;</li><li>MERKURjev piknik&nbsp;</li><li>številni popusti\n</li></ul></div><p></p></div>",
+   "companyQuestions": [],
+   "aboutCompany": "<p></p><h3><strong><img src=\"https://api.mojedelo.com/uploaded-files/public/png/2025/4/23/b6e47a5ab65f4b42803b708a5e4c1436.png\n\" height=\"38\" width=\"38\" title=\"zaposlitev\"> SPLOŠNO O PODJETJU</strong></h3>\n\nMERKUR trgovina d.o.o. je vodilno slovensko podjetje za prodajo izdelkov za dom, vrt in delavnico s 24 trgovskimi centri in uspešno spletno trgovino.<div><br>&nbsp;\n\n<h3><strong><img src=\"https://api.mojedelo.com/uploaded-files/public/png/2025/4/23/4df58099be1e42929bb951546d4b0655.png\n\" height=\"38\" width=\"38\" title=\"zaposlitev\">&nbsp;NAŠA VIZIJA IN CILJI</strong></h3>\n\nMERKUR trgovina d.o.o., ustanovljena leta 1896, je postala prepoznavna blagovna znamka v Sloveniji. Vizija podjetja je ohranjanje vodilne pozicije na področju prodaje izdelkov za dom, vrt in delavnico. Cilji podjetja so osredotočeni na nenehno izboljševanje kakovosti storitev, uvajanje inovacij in zagotavljanje odlične izkušnje za stranke. MERKUR se ponaša z najboljšo spletno trgovino za dom in vrt po izboru kupcev in programom zvestobe MERKUR Zate, ki nagrajuje lojalnost. Poleg tega si podjetje prizadeva širiti svojo prisotnost in izboljševati svoje storitve v vseh 24 trgovskih centrih, kar omogoča, da ostane korak pred konkurenco in zadovolji potrebe svojih kupcev.</div><div><br><h3><strong><img src=\"https://api.mojedelo.com/uploaded-files/public/png/2025/4/23/7b86ab9f383f411e88af532667d8fbfc.png\n\" height=\"38\" width=\"38\" title=\"zaposlitev\"> ORGANIZACIJSKA KULTURA IN KLIMA</strong></h3>\n\nV MERKURju ustvarjamo spodbudno delovno okolje, ki temelji na naših osnovnih principih delovanja. OSREDOTOČENI smo na zaposlene, kupce in izvajanje nalog, kar omogoča učinkovito in zadovoljno delovno silo. Naši zaposleni so ODGOVORNI tako na delovnem mestu kot tudi doma, kar krepi zaupanje in integriteto. Skrbimo za lažje usklajevanje poklicnega in zasebnega življenja, kar prispeva k boljši produktivnosti in zadovoljstvu zaposlenih. Raznolikost med nami pozdravljamo z nasmehom, saj verjamemo, da ravno to prispeva k ustvarjalnemu delovnemu okolju. Smo PRISTNI in spodbujamo povratno informacijo na vseh nivojih poslovanja, kar zagotavlja odprto komunikacijo in nenehno izboljševanje.<p></p></div>",
+   "aboutCompanyImage": null,
+   "mainActivities": null,
+   "visionAndGoals": null,
+   "structureAndCulture": null,
+   "customCompanyDescription": null,
+   "portfolioImage": null,
+   "benefitsText": null,
+   "customBenefitsTextHtml": null,
+   "benefitsImage": null,
+   "additionalBenefits": [],
+   "impressions": [
+    {
+     "id": "b745d8e7-13f9-4f1e-b36c-c3c90944c021",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "3a1a86c8-689c-4988-94c5-3a1fe15294f9",
+      "originalName": "ae7f9cf517924e969789b23428a1f70b.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/ae7f9cf517924e969789b23428a1f70b.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    },
+    {
+     "id": "7001212c-6bee-4676-85c2-41fc20ff6d97",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "601157c4-be18-4405-8c5b-4795a47f80d6",
+      "originalName": "6075d66399dc46cb9868c8dbb36432e3.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/6075d66399dc46cb9868c8dbb36432e3.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    },
+    {
+     "id": "a18ffb2b-af4c-45dc-9271-91e82de8f896",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "7b67342b-ec8e-4ec3-9ea6-eaa46434c726",
+      "originalName": "9977853d5c1f429e9a37145e7a5cd06b.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/9977853d5c1f429e9a37145e7a5cd06b.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    },
+    {
+     "id": "85ab7b09-10e5-4880-9925-d8f8849294f9",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "428de797-214b-4b90-840f-c0bd4b5bbc54",
+      "originalName": "96e3278b96144ce3918a0b7741d28cb6.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/96e3278b96144ce3918a0b7741d28cb6.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    },
+    {
+     "id": "fb4b3e0f-3062-49a1-ac77-d8742380cf9f",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "be13cca9-e92d-435a-a2c9-2058964f208c",
+      "originalName": "618f684313cb40fc961e335e4e712aa8.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/618f684313cb40fc961e335e4e712aa8.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    },
+    {
+     "id": "243a4983-c78d-43c7-a560-592fc6ff0a8e",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "fb9b3249-892d-4b16-9ea3-179f4b06ef47",
+      "originalName": "c7453d5a6713420cb7d02b87f82e10b2.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/c7453d5a6713420cb7d02b87f82e10b2.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    },
+    {
+     "id": "bae6cf5d-ce5b-4301-a664-40a73936cdc8",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "66531fe5-1fb5-4950-a360-2b703bdcdfa6",
+      "originalName": "4b4df861a16244ef868f7cba6a6c59a5.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/4b4df861a16244ef868f7cba6a6c59a5.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    },
+    {
+     "id": "16939ac6-add4-403d-99c5-85ebd6244b41",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "dab5b91f-1dd6-475f-a373-4abdce9cbdec",
+      "originalName": "66558a55de0e41b3967a16e58bfd453d.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/66558a55de0e41b3967a16e58bfd453d.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    },
+    {
+     "id": "ed41bde1-4adc-41ad-a0bd-da7e6251ee15",
+     "title": null,
+     "order": null,
+     "file": {
+      "id": "bb894e33-a41e-4d06-9ad1-f3be47eef6a7",
+      "originalName": "bca9ffd08c544c5c8b5bc67073e8c31c.png",
+      "url": "https://api.mojedelo.com/./uploaded-files/public/png/2025/7/31/bca9ffd08c544c5c8b5bc67073e8c31c.png"
+     },
+     "file820x546": null,
+     "file435x290": null,
+     "file281x187": null,
+     "file205x136": null
+    }
+   ],
+   "vatNumber": "76138437",
+   "postalCode": "4202",
+   "address": "Cesta na okroglo, 7",
+   "purchasedCompanyPresentation": false,
+   "badges": [],
+   "canSeekersApplyToCompany": false
+  },
+  "anonymizedCompany": null,
+  "town": {
+   "id": "2d793d2c-0185-437d-b678-8a1a665e622c",
+   "translation": "Murska Sobota",
+   "name": "Murska Sobota"
+  },
+  "country": {
+   "id": "04918cba-37dd-452e-b018-ab9411354123",
+   "translation": "Slovenija",
+   "name": "Slovenia"
+  },
+  "salary": null,
+  "jobAdTranslation": {
+   "id": "aab9b03d-bf96-4c52-a764-6dea55e1f6a6",
+   "languageTaxonomyId": "4ba92d15-49c1-4aab-97f3-86ede9dcf237"
+  },
+  "totalWorkExperience": {
+   "id": "4cedea1d-1422-466e-b9fe-5700373af551",
+   "translation": "0 do 1 leto",
+   "name": "0 to 1 year"
+  },
+  "languageRequired": null,
+  "educationLevels": [
+   {
+    "id": "9ee76bbe-54a5-4ff3-9393-edd42b4efb73",
+    "translation": "dokončana srednja poklicna šola (3 leta)"
+   }
+  ],
+  "employmentTypes": [
+   {
+    "id": "8a0a644f-addc-4610-a241-fe55b4f03b23",
+    "translation": "Redno, nedoločen d. č."
+   }
+  ],
+  "jobCategories": [
+   {
+    "id": "ddf68b02-1782-445e-99b4-89332441f667",
+    "translation": "Transport in Logistika"
+   }
+  ],
+  "occupation": {
+   "id": "e3b55079-59c6-406c-9ea9-2a9168a8eab6",
+   "translation": "Skladiščnik",
+   "name": "Warehouseman",
+   "jobCategory": {
+    "id": "ddf68b02-1782-445e-99b4-89332441f667",
+    "dateDeleted": null,
+    "name": "Transport and Logistics",
+    "approved": null,
+    "dateCreated": "2024-07-24T08:30:35.748Z",
+    "dateUpdated": "2024-07-24T08:30:35.748Z",
+    "jobiqoId": "21539",
+    "legacyId": null,
+    "jobCategoryTranslations": {
+     "db3c58e6-a083-4f72-b30b-39f2127bb18d": {
+      "id": "f16d2091-54e9-4767-bf9e-fff199bebf94",
+      "translation": "Transport in Logistika",
+      "sort": 0,
+      "enabled": true,
+      "dateCreated": "2025-07-25T23:09:57.842Z",
+      "dateUpdated": "2025-07-25T23:09:57.842Z",
+      "tenantId": "5947a585-ad25-47dc-bff3-f08620d1ce17",
+      "languageId": "db3c58e6-a083-4f72-b30b-39f2127bb18d",
+      "channelId": "8805c1b8-a0a9-4f57-ad42-329af3c92a61",
+      "jobCategoryId": "ddf68b02-1782-445e-99b4-89332441f667"
+     },
+     "b12341f8-a37f-447b-98c8-70ae387d38f2": {
+      "id": "b4ff4313-0b1e-40ee-b972-36b37c0fc6b2",
+      "translation": "Transport and Logistics",
+      "sort": 0,
+      "enabled": true,
+      "dateCreated": "2025-07-25T23:09:57.842Z",
+      "dateUpdated": "2025-07-25T23:09:57.842Z",
+      "tenantId": "5947a585-ad25-47dc-bff3-f08620d1ce17",
+      "languageId": "b12341f8-a37f-447b-98c8-70ae387d38f2",
+      "channelId": "8805c1b8-a0a9-4f57-ad42-329af3c92a61",
+      "jobCategoryId": "ddf68b02-1782-445e-99b4-89332441f667"
+     }
+    }
+   }
+  },
+  "regions": [
+   {
+    "id": "6f410cdf-9ae8-4a7e-9944-deb71d1b3b90",
+    "translation": "Pomurska"
+   }
+  ],
+  "workModes": [],
+  "jobAdCvReminder": null,
+  "workTime": {
+   "id": "1fd68d19-bfb0-4f74-b7c1-5ad83c51f546",
+   "translation": "Polni delovni čas",
+   "name": "Full time"
+  },
+  "jobAdType": {
+   "id": "7e2a1e06-06d2-4c29-8a77-8a5fb074e81a",
+   "key": "premium",
+   "type": "job_ad_type",
+   "price": "690.00"
+  },
+  "featuredCompatibilityRule": null,
+  "jobAdReviewNotes": [],
+  "applicationRecipientEmails": [],
+  "primaryJobCategory": null,
+  "applicationType": "redirect_to_url",
+  "genderDisplay": "male_female_other",
+  "appliedAt": null,
+  "isSaved": false
+ }
+}

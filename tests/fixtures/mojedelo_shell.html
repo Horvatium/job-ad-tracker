@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="sl" translate="no" class="notranslate">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google" content="notranslate" />
+    <meta http-equiv="Content-Language" content="sl" />
+    
+    <title>Moje delo</title>
+    <meta property="og:title" content="Moje delo" />
+    <meta property="og:description" content="Moje Delo je vodilni slovenski karierni portal z aktualnimi zaposlitvami, orodji za iskalce dela in rešitvami za delodajalce." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MojeDelo.com" />
+    <meta property="og:image" content="https://mojedelo.com/assets/images/socials-logo.png" data-rh="true">
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Moje delo" />
+    <meta name="twitter:description" content="Moje Delo je vodilni slovenski karierni portal z aktualnimi zaposlitvami, orodji za iskalce dela in rešitvami za delodajalce." />
+    <meta name="twitter:image" content="https://mojedelo.com/assets/images/socials-logo.png" />
+    <script>
+      window.app = {
+        APP_VERSION: '0.0.3',
+      }
+      function initAppConfigPreload () {
+        let baseUrl = window.location.hostname;
+        let lang = '';
+        const langDash = window.location.pathname[0];
+        if(langDash === '/' && window.location.pathname[1] && (langDash === window.location.pathname[3] || !window.location.pathname[3])) {
+          lang = `/${window.location.pathname.slice(1, 3)}`
+        }
+        const apiUrl = 'https://api.mojedelo.com'
+        const globalPreload = document.createElement('link');
+        globalPreload.rel = 'preload';
+        globalPreload.href = `${apiUrl}/uploaded-files/config/${baseUrl}${lang}/jb.globals.js`;
+        globalPreload.as = 'script';
+        document.head.appendChild(globalPreload);
+        const employersPreload = document.createElement('link');
+        employersPreload.rel = 'preload';
+        employersPreload.href = `${apiUrl}/uploaded-files/config/${baseUrl}${lang}/jb.employers.js`;
+        employersPreload.as = 'script';
+        document.head.appendChild(employersPreload);
+      }
+      initAppConfigPreload()
+    </script>
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    
+    <link rel="modulepreload" crossorigin href="/assets/monitoring-CvXjN9Ur.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-B4W5GPPP.js">
+    <link rel="stylesheet" crossorigin href="/assets/vendor-DeYZU9OJ.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-B345DpRy.css">
+  </head>
+  <body translate="no">
+    <script>
+      function initAppConfigLoad () {
+        let baseUrl = window.location.hostname;
+        let lang = '';
+        const langDash = window.location.pathname[0];
+        if(langDash === '/' && window.location.pathname[1] && (langDash === window.location.pathname[3] || !window.location.pathname[3])) {
+          lang = `/${window.location.pathname.slice(1, 3)}`
+        }
+        const apiUrl = 'https://api.mojedelo.com'
+        const globalScript = document.createElement('script');
+        globalScript.async = true
+        globalScript.src = `${apiUrl}/uploaded-files/config/${baseUrl}${lang}/jb.globals.js`;
+        document.body.appendChild(globalScript);
+        const employersScript = document.createElement('script');
+        employersScript.async = true
+        employersScript.src = `${apiUrl}/uploaded-files/config/${baseUrl}${lang}/jb.employers.js`;
+        document.body.appendChild(employersScript);
+      }
+      initAppConfigLoad()
+    </script>
+    <div id="root" translate="no" class="notranslate"></div>
+    <script>
+      const global = globalThis
+    </script>
+    <script type="module" crossorigin src="/assets/index-NeEs0rJZ.js" defer></script>
+</body>
+</html>

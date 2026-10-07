@@ -1,0 +1,321 @@
+{
+ "data": {
+  "isMoreThan30DaysAllowed": false,
+  "jobAdEInterviewQuestions": [],
+  "jobAdTranslations": [
+   {
+    "id": "d8b94bfd-794c-4579-931f-ee57711595c5",
+    "title": "IT svetovalec / razvijalec m/ž (hibridno delo, celotna Slovenija)",
+    "dateCreated": "2026-04-08T07:32:29.915Z",
+    "dateUpdated": "2026-04-08T07:32:29.915Z",
+    "jobDescription": "<ul><li><p>Razvoj tako individualnih kot tudi standardnih programskih rešitev za podporo poslovno kritičnim operacijam.</p></li><li><p>Razvoj in prilagoditve programskih rešitev za potrebe strank kot tudi za interne potrebe.</p></li><li><p>Sodelovanje v vseh fazah procesa razvoja programske opreme za potrebe razširitev, nadaljnjega razvoja, testiranja in vzdrževanja.</p></li><li><p>Strokovna podpora strankam in pomoč pri uporabi programske opreme.</p></li></ul>",
+    "weOffer": "<ul><li><p>Zaposlitev za nedoločen čas s poskusno dobo treh mesecev</p></li><li><p>Odlične možnosti za usposabljanje ter nadaljnjo osebno in poklicno rast</p></li><li><p>Možnosti za razmišljanje izven okvirjev z delom v sproščenim, dinamičnem, inovativnem in kreativnem mednarodnem podjetju</p></li><li><p>Osebno delovno okolje z aktivnimi odmori s sodelavci (igranje namiznega tenisa, košarke ipd.)</p></li><li><p>Timsko delo v dinamični, prijetni in tesno povezani ekipi</p></li><li><p>Priložnost za delo z najnovejšimi tehnologijami in nenehno pridobivanje novih znanj</p></li><li><p>Občasna projektna potovanja in tesno sodelovanje s sodelavci na oddaljenih lokacijah podjetja</p></li><li><p>Številne druge ugodnosti, kot so delo od doma in prilagodljiv delovni čas</p></li></ul>",
+    "weExpect": "<ul><li><p>Vsaj VI. stopnja izobrazbe računalniške ali sorodne tehnične smeri</p></li><li><p>Dobro poznavanje razvoja v Javi (Java EE), relacijskih podatkovnih baz (SQL) ter modeliranja in načrtovanja</p></li><li><p>Zaželene strokovne izkušnje z razvojem aplikacij na podlagi Java EE</p></li><li><p>Poznavanje agilnih metod za razvoj informacijskih sistemov predstavlja prednost</p></li><li><p>Izkušnje v IT-projektih v zavarovalniškem sektorju so dobrodošle</p></li></ul><h3>Osebnostne lastnosti</h3><ul><li><p>Komunikativnost, samostojnost, natančnost, ustvarjalnost in pripravljenost sodelovanja v skupini</p></li></ul><h3>Jezikovna znanja</h3><ul><li><p>Aktivno znanje angleškega jezika</p></li><li><p>Znanje nemškega jezika predstavlja prednost</p><p></p></li></ul><p></p>",
+    "aboutTheCompany": null,
+    "waysToApply": null,
+    "adSummary": "Za naslednji možni vstopni rok na lokaciji v Mariboru iščemo IT svetovalca / razvijalca s poudarkom na razvoju programske opreme Java EE in IT projektih. Nudimo zaposlitev za nedoločen čas.Številne ugodnosti, kot so delo od doma in prilagodljiv delovni čas: Ker si zaslužite več kot le privlačno plačilo za svoje delo. Zato ste vabljeni k prijavi kandidati iz celotne Slovenije.",
+    "graphicAdSummary": null,
+    "languageTaxonomyId": "4ba92d15-49c1-4aab-97f3-86ede9dcf237",
+    "promoImageId": null,
+    "promoImage": null,
+    "templateId": "85a9ca90-0135-4578-9d85-334e87b9972a",
+    "template": {
+     "id": "85a9ca90-0135-4578-9d85-334e87b9972a",
+     "name": "Novum-RGI Germany GmbH - splošni ",
+     "templateLayoutName": "Custom-Layout",
+     "style": null,
+     "layoutSections": {
+      "mobile": {
+       "customHtml": "<meta charset=\"UTF-8\" />\n<style>\n  @import url(\"https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap\");\n\n  #tplContainer {\n    margin: 0 auto;\n    padding: 0px 0 0px;\n    font: 16.5px \"Raleway\", sans-serif;\n    color: #575757;\n    line-height: 26px;\n    text-align: left;\n    background: #fff;\n    min-width: 300px;\n  }\n  #tplContainer h2 {\n    margin: 0px 0 15px;\n    padding: 0px;\n    font: 24px \"Raleway\", sans-serif;\n    color: #f1890d;\n    font-weight: 700;\n    text-align: center;\n    line-height: normal;\n    text-transform: none;\n    line-height: normal;\n  }\n  #tplContainer h3 {\n    margin: 0px 0 0px 0px;\n    padding: 17px 0px 15px 0px;\n    font: 18px \"Raleway\", sans-serif;\n    color: #575757;\n    font-weight: 700;\n    text-decoration: underline;\n    text-align: center;\n    text-transform: none;\n    line-height: 21px;\n  }\n  #tplContainer ul {\n    margin: 0;\n    padding: 0px 20px 20px 21px;\n    text-align: left;\n  }\n  #tplContainer ul li {\n    margin: 0;\n    padding: 0px 0px;\n    list-style: none;\n  }\n  #tplContainer ul li:before {\n    margin: -1px -21px;\n    padding: 0;\n    content: \"\\25CF\";\n    color: #f1890d;\n    float: left;\n    font-size: 12px;\n  }\n  #tplContainer ul li ul {\n    margin: 0;\n    padding: 0 0 0px 25px;\n  }\n  #tplContainer ul li ul li {\n    margin: 0;\n    padding: 0px 0;\n    list-style: none;\n  }\n  #tplContainer ul li ul li:before {\n    margin: -2px -21px;\n    padding: 0;\n    content: \"\\25CF\";\n    color: #575757;\n    float: left;\n  }\n  #tplContainer a {\n    color: inherit;\n    text-decoration: underline;\n    font-weight: revert;\n  }\n  #tplContainer a:hover {\n    text-decoration: none;\n  }\n  #tplContainer p {\n    margin: 0 0px 15px;\n    padding: 0;\n  }\n  #tplContainer b,\n  #tplContainer strong {\n    font-weight: bold !important;\n  }\n  #tplContainer i,\n  #tplContainer em {\n    font-style: italic !important;\n  }\n  #tplContainer hr {\n    margin: 5px 395px 20px;\n    padding: 0;\n    height: 0;\n    border: 0;\n    border-top: 3px solid #ccc;\n    background-color: transparent;\n  }\n  .tplCntnAdCon {\n    margin: 0px 0px;\n    padding: 30px 40px;\n    text-align: left;\n    background: #fff;\n  }\n  .tplCntnAdTxt {\n    margin: 0px 0px 0;\n    padding: 30px 40px 15px;\n    text-align: left;\n    background: #e8e6e6;\n  }\n  .tplCntnAdBtm {\n    margin: 0px 0px 0;\n    padding: 30px 40px 15px;\n    text-align: left;\n    background: #f1890d;\n    color: white;\n  }\n  .row {\n    display: table;\n    background: transparent;\n  }\n  .col {\n    display: table-cell;\n    width: 33.33%;\n    padding: 0px 0px 0;\n  }\n  img {\n    width: 100%;\n  }\n</style>\n<div id=\"tplContainer\">\n  <img\n    src=\"https://api.mojedelo.com/uploaded-files/assets/templates/jpg/2025/3/19/32c23d98-cd50-47ac-a2b0-2815ea426372.jpg\"\n    style=\"width: 200px; margin: 0 auto; padding: 40px 0 0px;\"\n  />\n  <div class=\"tplCntnAdCon\">\n    <p style=\"text-align: center;\">\n      <strong>S strastjo razvijamo programske re&scaron;itve že 30 let</strong><br />\n      <br />\n      Razvijamo inovativne programske re&scaron;itve za mednarodni zavarovalni&scaron;ki trg.\n      Na&scaron;e storitve se osredotočajo na ključne aktuarske sisteme za premoženjska,\n      odgovornostna in nezgodna, življenjska in zdravstvena zavarovanja.\n    </p>\n  </div>\n  <img\n    src=\"https://api.mojedelo.com/uploaded-files/assets/templates/jpg/2025/3/19/5c20270f-f340-45b8-aebf-4cf87a12e33b.jpg\"\n    style=\"margin-top: -30px;\"\n  />\n  <div class=\"tplCntnAdTxt\">\n    <p style=\"text-align: center;\">Za naslednji možni vstopni rok vabimo v svojo ekipo:</p>\n\n    <h2>[TITLE]</h2>\n\n    <h3>\n      <br />\n      <span style=\"font-size:18px;\"><u>Opis delovnega mesta:</u></span>\n    </h3>\n    [JOBDESCRIPTION]\n\n    <h3><u>Zahteve in odgovornosti:</u></h3>\n    [JOBEXPECTATION]\n\n    <h3>Nudimo:</h3>\n    [JOBOFFERING]\n\n    <p style=\"padding: 20px 0 0 0 \">\n      <strong\n        >&Scaron;tevilne druge ugodnosti, kot so delo od doma in prilagodljiv delovni čas:\n        <em\n          >Ker si zaslužite več kot le privlačno plačilo za svoje delo. Zato ste vabljeni k prijavi\n          kandidati iz celotne&nbsp;Slovenije.</em\n        ></strong\n      >\n    </p>\n  </div>\n  <img\n    src=\"https://api.mojedelo.com/uploaded-files/assets/templates/jpeg/2025/3/19/7d121d5e-44d1-448c-90ea-3ef7dca17602.jpeg\"\n    style=\"height: 200px; object-fit: cover;\"\n  />\n  <div class=\"tplCntnAdBtm\">\n    <p style=\"text-align: center;\">\n      <strong>Zainteresirani?<br /> </strong><br />\n      Preprosto nam po&scaron;ljite življenjepis.\n    </p>\n\n    <p style=\"text-align: center;\"></p>\n  </div>\n</div>\n"
+      },
+      "desktop": {
+       "customHtml": "<meta charset=\"UTF-8\" />\n<style>\n  @import url(\"https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap\");\n\n  #tplContainer {\n    margin: 0 auto;\n    padding: 0px 0 0px;\n    font: 16.5px \"Raleway\", sans-serif;\n    color: #575757;\n    line-height: 26px;\n    text-align: left;\n    background: #fff;\n  }\n  #tplContainer h2 {\n    margin: 0px 0 15px;\n    padding: 0px;\n    font: 38px \"Raleway\", sans-serif;\n    color: #f1890d;\n    font-weight: 700;\n    text-align: center;\n    line-height: normal;\n    text-transform: none;\n    line-height: normal;\n  }\n  #tplContainer h3 {\n    margin: 0px 0 0px 0px;\n    padding: 17px 0px 15px 0px;\n    font: 18px \"Raleway\", sans-serif;\n    color: #575757;\n    font-weight: 700;\n    text-decoration: underline;\n    text-align: center;\n    text-transform: none;\n    line-height: 21px;\n  }\n  #tplContainer ul {\n    margin: 0;\n    padding: 0px 20px 20px 21px;\n    text-align: left;\n  }\n  #tplContainer ul li {\n    margin: 0;\n    padding: 0px 0px;\n    list-style: none;\n  }\n  #tplContainer ul li:before {\n    margin: -1px -21px;\n    padding: 0;\n    content: \"\\25CF\";\n    color: #f1890d;\n    float: left;\n    font-size: 12px;\n  }\n  #tplContainer ul li ul {\n    margin: 0;\n    padding: 0 0 0px 25px;\n  }\n  #tplContainer ul li ul li {\n    margin: 0;\n    padding: 0px 0;\n    list-style: none;\n  }\n  #tplContainer ul li ul li:before {\n    margin: -2px -21px;\n    padding: 0;\n    content: \"\\25CF\";\n    color: #575757;\n    float: left;\n  }\n  #tplContainer a {\n    color: inherit;\n    text-decoration: underline;\n    font-weight: revert;\n  }\n  #tplContainer a:hover {\n    text-decoration: none;\n  }\n  #tplContainer p {\n    margin: 0 0px 15px;\n    padding: 0;\n  }\n  #tplContainer b,\n  #tplContainer strong {\n    font-weight: bold !important;\n  }\n  #tplContainer i,\n  #tplContainer em {\n    font-style: italic !important;\n  }\n  #tplContainer hr {\n    margin: 5px 395px 20px;\n    padding: 0;\n    height: 0;\n    border: 0;\n    border-top: 3px solid #ccc;\n    background-color: transparent;\n  }\n  .tplCntnAdCon {\n    margin: 0px 0px;\n    padding: 30px 60px;\n    text-align: left;\n    background: #fff;\n  }\n  .tplCntnAdTxt {\n    margin: 0px 0px 0;\n    padding: 30px 60px 15px;\n    text-align: left;\n    background: #e8e6e6;\n  }\n  .tplCntnAdBtm {\n    margin: 0px 0px 0;\n    padding: 30px 60px 15px;\n    text-align: left;\n    background: #f1890d;\n    color: white;\n  }\n  .row {\n    display: table;\n    background: transparent;\n  }\n  .col {\n    display: table-cell;\n    width: 33.33%;\n    padding: 0px 0px 0;\n  }\n  img {\n    width: 100%;\n  }\n</style>\n<div id=\"tplContainer\">\n  <img\n    src=\"https://api.mojedelo.com/uploaded-files/assets/templates/jpg/2025/3/19/32c23d98-cd50-47ac-a2b0-2815ea426372.jpg\"\n    style=\"width: 280px; margin: 0 auto; padding: 40px 0 0px;\"\n  />\n  <div class=\"tplCntnAdCon\">\n    <p style=\"text-align: center;\">\n      <strong>S strastjo razvijamo programske re&scaron;itve že 30 let</strong><br />\n      <br />\n      Razvijamo inovativne programske re&scaron;itve za mednarodni zavarovalni&scaron;ki trg.\n      Na&scaron;e storitve se osredotočajo na ključne aktuarske sisteme za premoženjska,\n      odgovornostna in nezgodna, življenjska in zdravstvena zavarovanja.\n    </p>\n  </div>\n  <img\n    src=\"https://api.mojedelo.com/uploaded-files/assets/templates/jpg/2025/3/19/5c20270f-f340-45b8-aebf-4cf87a12e33b.jpg\"\n    style=\"margin-top: -30px;\"\n  />\n  <div class=\"tplCntnAdTxt\">\n    <p style=\"text-align: center;\">Za naslednji možni vstopni rok vabimo v svojo ekipo:</p>\n\n    <h2>[TITLE]</h2>\n\n    <h3>\n      <br />\n      <span style=\"font-size:18px;\"><u>Opis delovnega mesta:</u></span>\n    </h3>\n    [JOBDESCRIPTION]\n\n    <h3><u>Zahteve in odgovornosti:</u></h3>\n    [JOBEXPECTATION]\n\n    <h3>Nudimo:</h3>\n    [JOBOFFERING]\n\n    <p style=\"padding: 20px 0 0 0 \">\n      <strong\n        >&Scaron;tevilne druge ugodnosti, kot so delo od doma in prilagodljiv delovni čas:\n        <em\n          >Ker si zaslužite več kot le privlačno plačilo za svoje delo. Zato ste vabljeni k prijavi\n          kandidati iz celotne&nbsp;Slovenije.</em\n        ></strong\n      >\n    </p>\n  </div>\n  <img\n    src=\"https://api.mojedelo.com/uploaded-files/assets/templates/jpeg/2025/3/19/7d121d5e-44d1-448c-90ea-3ef7dca17602.jpeg\"\n    style=\"height: 400px; object-fit: cover;\"\n  />\n  <div class=\"tplCntnAdBtm\">\n    <p style=\"text-align: center;\">\n      <strong>Zainteresirani?<br /> </strong><br />\n      Preprosto nam po&scaron;ljite življenjepis.\n    </p>\n\n    <p style=\"text-align: center;\"></p>\n  </div>\n</div>\n"
+      }
+     },
+     "languageTaxonomyId": "4ba92d15-49c1-4aab-97f3-86ede9dcf237"
+    },
+    "languageTaxonomy": {
+     "id": "4ba92d15-49c1-4aab-97f3-86ede9dcf237",
+     "name": "Slovenščina",
+     "isoLanguageCode": "SLV"
+    }
+   }
+  ],
+  "id": "05e90325-ba51-4594-b954-c76c4651e071",
+  "title": "IT svetovalec / razvijalec m/ž (hibridno delo, celotna Slovenija)",
+  "adSummary": "Za naslednji možni vstopni rok na lokaciji v Mariboru iščemo IT svetovalca / razvijalca s poudarkom na razvoju programske opreme Java EE in IT projektih. Nudimo zaposlitev za nedoločen čas.Številne ugodnosti, kot so delo od doma in prilagodljiv delovni čas: Ker si zaslužite več kot le privlačno plačilo za svoje delo. Zato ste vabljeni k prijavi kandidati iz celotne Slovenije.",
+  "startDate": "2026-09-21T22:03:42.614Z",
+  "endDate": "2026-10-22T21:59:59.999Z",
+  "repostingDate": null,
+  "repostingDates": [],
+  "dateCreated": "2026-07-23T10:37:00.462Z",
+  "dateUpdated": "2026-09-21T22:03:42.609Z",
+  "aboutTheCompany": null,
+  "waysToApply": null,
+  "companyUserCreationStep": "finished",
+  "jobAdAdditionalFeatures": [
+   {
+    "id": "5e521ec5-8a11-4e50-937a-f9d6fa61f08d",
+    "key": "email-applications",
+    "name": "Prejemanje prijav na e-mail",
+    "type": "additional_feature",
+    "price": "10.00"
+   }
+  ],
+  "graphicAdSummary": null,
+  "jobDescription": "<ul><li><p>Razvoj tako individualnih kot tudi standardnih programskih rešitev za podporo poslovno kritičnim operacijam.</p></li><li><p>Razvoj in prilagoditve programskih rešitev za potrebe strank kot tudi za interne potrebe.</p></li><li><p>Sodelovanje v vseh fazah procesa razvoja programske opreme za potrebe razširitev, nadaljnjega razvoja, testiranja in vzdrževanja.</p></li><li><p>Strokovna podpora strankam in pomoč pri uporabi programske opreme.</p></li></ul>",
+  "promoImage": {
+   "id": null,
+   "originalName": null,
+   "mimeType": null,
+   "domain": null,
+   "destination": null,
+   "fileName": null,
+   "path": null,
+   "size": null,
+   "height": null,
+   "width": null,
+   "type": null,
+   "status": null,
+   "parentId": null,
+   "url": null
+  },
+  "jobLocation": "slovenia",
+  "jobLocationInput": null,
+  "probationPeriod": 3,
+  "status": "published",
+  "url": null,
+  "weExpect": "<ul><li><p>Vsaj VI. stopnja izobrazbe računalniške ali sorodne tehnične smeri</p></li><li><p>Dobro poznavanje razvoja v Javi (Java EE), relacijskih podatkovnih baz (SQL) ter modeliranja in načrtovanja</p></li><li><p>Zaželene strokovne izkušnje z razvojem aplikacij na podlagi Java EE</p></li><li><p>Poznavanje agilnih metod za razvoj informacijskih sistemov predstavlja prednost</p></li><li><p>Izkušnje v IT-projektih v zavarovalniškem sektorju so dobrodošle</p></li></ul><h3>Osebnostne lastnosti</h3><ul><li><p>Komunikativnost, samostojnost, natančnost, ustvarjalnost in pripravljenost sodelovanja v skupini</p></li></ul><h3>Jezikovna znanja</h3><ul><li><p>Aktivno znanje angleškega jezika</p></li><li><p>Znanje nemškega jezika predstavlja prednost</p><p></p></li></ul><p></p>",
+  "weOffer": "<ul><li><p>Zaposlitev za nedoločen čas s poskusno dobo treh mesecev</p></li><li><p>Odlične možnosti za usposabljanje ter nadaljnjo osebno in poklicno rast</p></li><li><p>Možnosti za razmišljanje izven okvirjev z delom v sproščenim, dinamičnem, inovativnem in kreativnem mednarodnem podjetju</p></li><li><p>Osebno delovno okolje z aktivnimi odmori s sodelavci (igranje namiznega tenisa, košarke ipd.)</p></li><li><p>Timsko delo v dinamični, prijetni in tesno povezani ekipi</p></li><li><p>Priložnost za delo z najnovejšimi tehnologijami in nenehno pridobivanje novih znanj</p></li><li><p>Občasna projektna potovanja in tesno sodelovanje s sodelavci na oddaljenih lokacijah podjetja</p></li><li><p>Številne druge ugodnosti, kot so delo od doma in prilagodljiv delovni čas</p></li></ul>",
+  "company": {
+   "id": "3d429a67-5d83-4459-8db9-d775f7ddc72c",
+   "name": "Novum-RGI Germany GmbH Podružnica Maribor",
+   "description": "",
+   "portfolio": null,
+   "isTopCompany": false,
+   "isBiziSiHidden": false,
+   "industry": null,
+   "town": {
+    "id": "bd8064f6-6b76-4cc0-8a1f-4e308de6b5a9",
+    "name": "Maribor",
+    "translation": "Maribor",
+    "municipality": "Maribor"
+   },
+   "country": {
+    "id": "04918cba-37dd-452e-b018-ab9411354123",
+    "name": "Slovenia",
+    "translation": "Slovenija"
+   },
+   "websites": [
+    {
+     "id": "6c16c2ba-5a7f-42c2-b5cd-d64b6e34416d",
+     "url": "https://www.novum-rgi.com/jobs"
+    }
+   ],
+   "welcomeMessages": [],
+   "logotype": {
+    "id": "e33ace99-4c45-4361-b473-4c280af9fcb6",
+    "originalName": "logoti template.png",
+    "url": "https://api.mojedelo.com/uploaded-files/private/png/2025/8/7/4aa50949-c4a7-4c00-901b-105f5b56b2e6.png"
+   },
+   "coverImage": {
+    "id": null,
+    "originalName": null,
+    "url": null
+   },
+   "videos": [],
+   "employmentInformationWhatWeExpect": null,
+   "employmentInformationWhatWeOffer": null,
+   "employmentInformationCustomTextHtml": null,
+   "companyQuestions": [],
+   "aboutCompany": null,
+   "aboutCompanyImage": null,
+   "mainActivities": null,
+   "visionAndGoals": null,
+   "structureAndCulture": null,
+   "customCompanyDescription": null,
+   "portfolioImage": null,
+   "benefitsText": null,
+   "customBenefitsTextHtml": null,
+   "benefitsImage": null,
+   "additionalBenefits": [],
+   "impressions": [],
+   "vatNumber": "88792528",
+   "postalCode": "2000",
+   "address": "Slovenska ulica 17",
+   "purchasedCompanyPresentation": false,
+   "badges": [],
+   "canSeekersApplyToCompany": false
+  },
+  "anonymizedCompany": null,
+  "town": {
+   "id": "bd8064f6-6b76-4cc0-8a1f-4e308de6b5a9",
+   "translation": "Maribor",
+   "name": "Maribor"
+  },
+  "country": {
+   "id": "04918cba-37dd-452e-b018-ab9411354123",
+   "translation": "Slovenija",
+   "name": "Slovenia"
+  },
+  "salary": null,
+  "jobAdTranslation": {
+   "id": "d8b94bfd-794c-4579-931f-ee57711595c5",
+   "languageTaxonomyId": "4ba92d15-49c1-4aab-97f3-86ede9dcf237"
+  },
+  "totalWorkExperience": {
+   "id": "592f33c4-99c6-4886-96b6-cc55ed53b7c5",
+   "translation": "1+ do 3 leta",
+   "name": "1+ to 3 years"
+  },
+  "languageRequired": null,
+  "educationLevels": [
+   {
+    "id": "6301b008-3244-418a-8067-6bba22633668",
+    "translation": "dokončan visokošolski strokovni ali univerzitetni program / 1. bolonjska stopnja"
+   },
+   {
+    "id": "64b46dc3-8e1c-4309-8d6e-b9c0040b5f34",
+    "translation": "dokončana gimnazija in ostale štiriletne šole"
+   },
+   {
+    "id": "66234805-77df-483c-95f9-74e1c1b288ba",
+    "translation": "magisterij znanosti"
+   },
+   {
+    "id": "c53506b9-e6e8-4c31-9c8b-8ee07e67955d",
+    "translation": "dokončan višješolski strokovni program"
+   },
+   {
+    "id": "f9587c2e-f7ff-4bd2-b124-5182407bcc09",
+    "translation": "univerzitetni programi pred bolonjsko reformo / magisterij stroke / 2. bolonjska stopnja"
+   }
+  ],
+  "employmentTypes": [
+   {
+    "id": "8a0a644f-addc-4610-a241-fe55b4f03b23",
+    "translation": "Redno, nedoločen d. č."
+   }
+  ],
+  "jobCategories": [
+   {
+    "id": "64f003ff-6d8b-4be0-b58c-4580e4eeeb8a",
+    "translation": "Računalništvo, Programiranje, IT"
+   }
+  ],
+  "occupation": {
+   "id": "4d2332fe-90fd-491e-9d3e-c74324a6ab5b",
+   "translation": "Razvijalec spletnih aplikacij",
+   "name": "Web application developer",
+   "jobCategory": {
+    "id": "64f003ff-6d8b-4be0-b58c-4580e4eeeb8a",
+    "dateDeleted": null,
+    "name": "Computing, Programming, IT",
+    "approved": null,
+    "dateCreated": "2024-07-24T08:30:35.748Z",
+    "dateUpdated": "2024-07-24T08:30:35.748Z",
+    "jobiqoId": "21516",
+    "legacyId": null,
+    "jobCategoryTranslations": {
+     "db3c58e6-a083-4f72-b30b-39f2127bb18d": {
+      "id": "3bae7683-fc53-4126-a03d-e30d736ff55d",
+      "translation": "Računalništvo, Programiranje, IT",
+      "sort": 0,
+      "enabled": true,
+      "dateCreated": "2025-07-25T23:09:57.842Z",
+      "dateUpdated": "2025-07-25T23:09:57.842Z",
+      "tenantId": "5947a585-ad25-47dc-bff3-f08620d1ce17",
+      "languageId": "db3c58e6-a083-4f72-b30b-39f2127bb18d",
+      "channelId": "8805c1b8-a0a9-4f57-ad42-329af3c92a61",
+      "jobCategoryId": "64f003ff-6d8b-4be0-b58c-4580e4eeeb8a"
+     },
+     "b12341f8-a37f-447b-98c8-70ae387d38f2": {
+      "id": "f1dd716f-daa7-4914-a5a1-17112ac6f5f2",
+      "translation": "Computing, Programming, IT",
+      "sort": 0,
+      "enabled": true,
+      "dateCreated": "2025-07-25T23:09:57.842Z",
+      "dateUpdated": "2025-07-25T23:09:57.842Z",
+      "tenantId": "5947a585-ad25-47dc-bff3-f08620d1ce17",
+      "languageId": "b12341f8-a37f-447b-98c8-70ae387d38f2",
+      "channelId": "8805c1b8-a0a9-4f57-ad42-329af3c92a61",
+      "jobCategoryId": "64f003ff-6d8b-4be0-b58c-4580e4eeeb8a"
+     }
+    }
+   }
+  },
+  "regions": [
+   {
+    "id": "0664edbd-83da-41b5-975c-e9b6935a5ffe",
+    "translation": "Koroška"
+   },
+   {
+    "id": "2bd5b700-fdd8-407a-be47-c7a121856244",
+    "translation": "Zasavska"
+   },
+   {
+    "id": "6f410cdf-9ae8-4a7e-9944-deb71d1b3b90",
+    "translation": "Pomurska"
+   },
+   {
+    "id": "71145839-3a87-48d9-a025-07b7c333fdac",
+    "translation": "Obalno-kraška"
+   },
+   {
+    "id": "90d3cf26-b601-4bda-a5fa-625e36ec3012",
+    "translation": "Goriška"
+   },
+   {
+    "id": "925feda0-81e2-425e-a4d3-457141156b8f",
+    "translation": "Podravska"
+   },
+   {
+    "id": "9c7bb46c-13fd-47de-b0ec-40f14b4cf391",
+    "translation": "Gorenjska"
+   },
+   {
+    "id": "abb63a68-a6e4-4a90-b74a-3be4f5af2f10",
+    "translation": "Savinjska"
+   },
+   {
+    "id": "b4ec6eb8-4e2f-4382-b59e-1aa72df3adbd",
+    "translation": "Posavska"
+   },
+   {
+    "id": "c8932c39-8ac4-4024-be0c-0e73ca08245f",
+    "translation": "Jugovzhodna"
+   },
+   {
+    "id": "d1dce9b1-9fa4-438b-b582-10d371d442e6",
+    "translation": "Osrednjeslovenska"
+   },
+   {
+    "id": "ebf16661-95dd-4ea2-8a06-611fc7ea42b9",
+    "translation": "Primorsko-notranjska"
+   }
+  ],
+  "workModes": [],
+  "jobAdCvReminder": null,
+  "workTime": {
+   "id": "1fd68d19-bfb0-4f74-b7c1-5ad83c51f546",
+   "translation": "Polni delovni čas",
+   "name": "Full time"
+  },
+  "jobAdType": {
+   "id": "7e2a1e06-06d2-4c29-8a77-8a5fb074e81a",
+   "key": "premium",
+   "type": "job_ad_type",
+   "price": "690.00"
+  },
+  "featuredCompatibilityRule": null,
+  "jobAdReviewNotes": [],
+  "applicationRecipientEmails": [
+   "career@novum-rgi.si"
+  ],
+  "primaryJobCategory": null,
+  "applicationType": "apply_via_jb",
+  "genderDisplay": "male_female_other",
+  "appliedAt": null,
+  "isSaved": false
+ }
+}
