@@ -23,6 +23,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urljoin, urlparse
 from urllib.request import Request, urlopen
 
+import mojedelo_baza as baza
+import mojedelo_preverjanje as preverjanje
+
 PORT = 8765
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGE = os.path.join(HERE, "mojedelo-oglasi.html")
@@ -936,6 +939,60 @@ class Handler(BaseHTTPRequestHandler):
     def _json(self, code, obj):
         self._send(code, json.dumps(obj, ensure_ascii=False))
 
+    @property
+    def store(self):
+        return getattr(self.server, "store", None)
+
+    def _read_json(self):
+        """Telo zahteve POST. Vrne podatke ali None, če je napaka že poslana."""
+        # Tuja stran lahko brez preverjanja pošlje POST na localhost (»text/plain« ne sproži CORS).
+        # Zahtevamo JSON, kar brskalnik pri tujem izvoru dovoli šele po predhodnem preverjanju (preflight),
+        # na katerega ne odgovorimo, in preverimo glavo Origin, če jo brskalnik pošlje.
+        origin = self.headers.get("Origin")
+        if origin and not host_header_ok(urlparse(origin).netloc):
+            self._json(403, {"ok": False, "error": "Tuj izvor."})
+            return None
+        if not (self.headers.get("Content-Type") or "").lower().startswith("application/json"):
+            self._json(415, {"ok": False, "error": "Pričakujem application/json."})
+            return None
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            length = -1
+        if not 0 < length <= MAX_BYTES:
+            self._json(413, {"ok": False, "error": "Telo zahteve je prazno ali preveliko."})
+            return None
+        try:
+            return json.loads(self.rfile.read(length).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            self._json(400, {"ok": False, "error": "Neveljaven JSON."})
+            return None
+
+    def do_POST(self):
+        if not host_header_ok(self.headers.get("Host")):
+            return self._send(403, "Forbidden", "text/plain; charset=utf-8")
+        path = urlparse(self.path).path
+        if path not in ("/api/jobs/batch", "/api/check"):
+            return self._send(404, "Not found", "text/plain; charset=utf-8")
+        data = self._read_json()
+        if data is None:
+            return
+        if path == "/api/check":
+            checker = getattr(self.server, "checker", None)
+            if not checker:
+                return self._json(404, {"ok": False, "error": "Preverjanje je izklopljeno (--no-check)."})
+            return self._json(200, {"ok": True, "started": checker.check_in_background(), **checker.status()})
+        if not self.store:
+            return self._json(404, {"ok": False, "error": "Baza ni vključena."})
+        if not isinstance(data, dict):
+            return self._json(400, {"ok": False, "error": "Pričakujem objekt."})
+        try:
+            saved = self.store.apply_batch(data.get("upsert") or [], data.get("delete") or [],
+                                           init=bool(data.get("init")))
+        except ValueError as e:
+            return self._json(400, {"ok": False, "error": str(e)})
+        self._json(200, {"ok": True, "jobs": saved})
+
     def do_GET(self):
         if not host_header_ok(self.headers.get("Host")):
             return self._send(403, "Forbidden", "text/plain; charset=utf-8")
@@ -947,7 +1004,17 @@ class Handler(BaseHTTPRequestHandler):
             except OSError:
                 self._send(500, "Datoteke mojedelo-oglasi.html ni poleg programa.", "text/plain; charset=utf-8")
         elif u.path == "/api/ping":
-            self._json(200, {"ok": True})
+            self._json(200, {"ok": True, "storage": "sqlite" if self.store else "none",
+                             "check": bool(getattr(self.server, "checker", None))})
+        elif u.path == "/api/check":
+            checker = getattr(self.server, "checker", None)
+            if not checker:
+                return self._json(404, {"ok": False, "error": "Preverjanje je izklopljeno (--no-check)."})
+            self._json(200, {"ok": True, **checker.status()})
+        elif u.path == "/api/jobs":
+            if not self.store:
+                return self._json(404, {"ok": False, "error": "Baza ni vključena."})
+            self._json(200, {"ok": True, "initialized": self.store.initialized(), "jobs": self.store.list_jobs()})
         elif u.path == "/api/fetch":
             url = (parse_qs(u.query).get("url") or [""])[0].strip()
             if not host_allowed(url):
@@ -974,10 +1041,26 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Lokalni pomočnik za mojedelo-oglasi.html")
     ap.add_argument("--port", type=int, default=PORT, help=f"začetna vrata (privzeto {PORT}, nato do +9)")
     ap.add_argument("--no-browser", action="store_true", help="ne odpri brskalnika ob zagonu")
+    ap.add_argument("--data-dir", default=HERE,
+                    help="mapa za bazo oglasi.db in varnostne kopije (privzeto mapa programa)")
+    ap.add_argument("--no-check", action="store_true",
+                    help="brez dnevnega preverjanja oglasov in obvestil o rokih")
+    ap.add_argument("--test-notification", action="store_true",
+                    help="prikaži poskusno obvestilo in končaj")
     args = ap.parse_args(argv)
+    if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+        # izpis takoj, tudi ko ne teče v terminalu; znak, ki ga konzola ne zna prikazati (č, ž), ne sme podreti programa
+        sys.stdout.reconfigure(line_buffering=True, errors="replace")
+    if args.test_notification:
+        ok = preverjanje.notify("Upravljalnik oglasov", "Obvestila delujejo. Tako boš opozorjen na roke prijav.")
+        sys.exit(0 if ok else 1)
     if not os.path.exists(PAGE):
         print("Napaka: poleg tega programa mora biti datoteka mojedelo-oglasi.html")
         sys.exit(1)
+    os.makedirs(args.data_dir, exist_ok=True)
+    store = baza.Store(os.path.join(args.data_dir, "oglasi.db"))
+    backup_dir = os.path.join(args.data_dir, "backups")
+    store.backup(backup_dir)
     server = None
     port = args.port
     for p in range(args.port, args.port + 10):
@@ -990,8 +1073,18 @@ def main(argv=None):
     if not server:
         print(f"Napaka: ni prostih vrat {args.port}–{args.port + 9}.")
         sys.exit(1)
+    server.store = store
     url = f"http://localhost:{port}/"
+    server.checker = None
+    if not args.no_check:
+        server.checker = preverjanje.Checker(store, get_ad, supported=host_allowed, backup_dir=backup_dir,
+                                             page_url=url)
+        server.checker.start()
     print(f"Pomočnik teče: {url}")
+    print(f"Baza: {store.path}")
+    print(f"Varnostne kopije (ena na dan, zadnjih 14): {backup_dir}")
+    if server.checker:
+        print("Enkrat na dan preverim, ali so oglasi še objavljeni, in obvestim o rokih v 3 dneh in jutri.")
     print("Za izhod pritisni Ctrl+C. To okno naj ostane odprto, dokler uporabljaš stran.\n")
     if not args.no_browser:
         try:
@@ -1004,6 +1097,7 @@ def main(argv=None):
         print("\nKonec.")
     finally:
         server.server_close()
+        store.close()
 
 
 if __name__ == "__main__":

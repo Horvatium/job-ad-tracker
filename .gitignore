@@ -4,6 +4,11 @@ __pycache__/
 .venv/
 .pytest_cache/
 
+# Baza in varnostne kopije (osebni seznam oglasov)
+*.db
+*.db-journal
+backups/
+
 # Izvozi iz aplikacije (vsebujejo osebne statuse in opombe)
 oglasi-*.json
 oglasi-*.csv

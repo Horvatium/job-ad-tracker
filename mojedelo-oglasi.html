@@ -51,6 +51,7 @@ button.small{padding:4px 9px;font-size:13px}
 .dlbox .d2{font-size:12px;opacity:.9}
 .dlbox.soon{background:var(--warn-soft);color:var(--warn)}
 .dlbox.over{background:var(--danger-soft);color:var(--danger)}
+.meta .gone{color:var(--danger);font-weight:600}
 .dlbox.none{background:transparent;color:var(--muted);border:1px dashed var(--line);font-size:12px}
 .actions{grid-column:2/4;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
 .actions select{padding:4px 8px;font-size:13px}
@@ -72,7 +73,7 @@ dialog h2{margin:0 0 12px;font-size:18px}
 <body>
 <div class="wrap">
   <h1>Moja delovna mesta</h1>
-  <p class="sub">Shranjeno lokalno v tem brskalniku. Redno naredi izvoz (JSON), da ne izgubiš podatkov. Rok s predpono ~ je ocenjen iz podatka »še X dni« na portalu.</p>
+  <p class="sub"><span id="subStore"></span> Rok s predpono ~ je ocenjen iz podatka »še X dni« na portalu.</p>
 
   <div id="demoBar"></div>
   <div id="banner"></div>
@@ -98,6 +99,7 @@ dialog h2{margin:0 0 12px;font-size:18px}
     <button id="btnImport">Uvoz JSON</button>
     <button id="btnIcs" title="Roki aktivnih oglasov kot dogodki z opomniki 3 dni in 1 dan prej">Izvoz v koledar (.ics)</button>
     <button id="btnEnrichAll" hidden>Dopolni manjkajoče podatke</button>
+    <button id="btnCheck" hidden title="Pomočnik to naredi sam enkrat na dan">Preveri, ali so oglasi še objavljeni</button>
     <input type="file" id="fileImport" accept=".json,application/json" hidden>
     <button class="danger" id="btnReset">Ponastavi na primere</button>
   </div>
@@ -200,10 +202,11 @@ function titleFromUrl(u){
     return slug.charAt(0).toUpperCase()+slug.slice(1);
   }catch(e){return "Oglas"}
 }
-function isoInDays(n){
-  const d=new Date();d.setDate(d.getDate()+n);
+function isoDate(d){
+  d=new Date(d);
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
+function isoInDays(n){const d=new Date();d.setDate(d.getDate()+n);return isoDate(d)}
 function seed(){
   const now=Date.now();
   return SEED.map((r,i)=>({id:uid(),url:"https://example.com/oglas/"+r[0],title:r[1],company:r[2],location:r[3],type:r[4],
@@ -242,13 +245,101 @@ async function enrich(j){
     return {ok:true,filled,warn:(d.warnings||[])[0]||""};
   }catch(e){return {ok:false,msg:"pomočnik ni dosegljiv"}}
 }
+// ---- shranjevanje
+// Način »local«: seznam je v localStorage tega brskalnika (stran odprta brez pomočnika).
+// Način »server«: seznam je v bazi pomočnika (oglasi.db); save() pošlje samo spremenjene in odstranjene oglase.
+let MODE="local";
+let synced=new Map();   // id -> JSON oglasa, kot je zadnjič shranjen v bazi
+let syncTimer=null,syncBusy=false,syncAgain=false,syncFailed=false;
+const SERVER_FIELDS=["statusAt","checkedAt","checkState","checkMsg"]; // nastavlja jih samo pomočnik
+const PENDING="mojedelo_neshranjeno"; // spremembe, ki jih ni bilo mogoče shraniti v bazo
+
+function readLocal(){
+  try{const raw=localStorage.getItem(STORE);const v=raw&&JSON.parse(raw);return Array.isArray(v)?v:null}catch(e){return null}
+}
 function load(){
-  let stored=null;
-  try{const raw=localStorage.getItem(STORE);if(raw)stored=JSON.parse(raw)}catch(e){}
-  if(!Array.isArray(stored)){jobs=seed();save();return}
+  const stored=readLocal();
+  if(!stored){jobs=seed();save();return}
   jobs=stored;
 }
-function save(){try{localStorage.setItem(STORE,JSON.stringify(jobs))}catch(e){}}
+function save(){
+  if(MODE==="local"){try{localStorage.setItem(STORE,JSON.stringify(jobs))}catch(e){}return}
+  clearTimeout(syncTimer);syncTimer=setTimeout(syncNow,300);
+}
+function pendingChanges(){
+  const ids=new Set(jobs.map(j=>j.id));
+  return {upsert:jobs.filter(j=>synced.get(j.id)!==JSON.stringify(j)),del:[...synced.keys()].filter(id=>!ids.has(id))};
+}
+async function postBatch(body){
+  const r=await fetch("/api/jobs/batch",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok||!d.ok)throw new Error(d.error||`napaka ${r.status}`);
+  return d;
+}
+async function syncNow(){
+  if(syncBusy){syncAgain=true;return}
+  const {upsert,del}=pendingChanges();
+  if(!upsert.length&&!del.length)return;
+  syncBusy=true;
+  const sent=upsert.map(j=>[j,JSON.stringify(j)]);
+  try{
+    const d=await postBatch({upsert,delete:del});
+    del.forEach(id=>synced.delete(id));
+    const byId=new Map((d.jobs||[]).filter(Boolean).map(s=>[s.id,s]));
+    sent.forEach(([j,snap])=>{
+      const s=byId.get(j.id);
+      // če se oglas med shranjevanjem ni spremenil, prevzame polja, ki jih nastavlja pomočnik (npr. statusAt)
+      if(s&&JSON.stringify(j)===snap){SERVER_FIELDS.forEach(k=>{j[k]=s[k]});synced.set(j.id,JSON.stringify(j))}
+      else synced.set(j.id,snap);
+    });
+    if(syncFailed){syncFailed=false;toast("Shranjeno v bazo")}
+    try{localStorage.removeItem(PENDING)}catch(e){}
+    render();
+  }catch(e){
+    syncFailed=true;
+    // da se sprememba ne izgubi, če stran zapreš, preden je pomočnik spet zagnan
+    try{const p=pendingChanges();localStorage.setItem(PENDING,JSON.stringify({upsert:p.upsert,delete:p.del}))}catch(e2){}
+    toast("Shranjevanje v bazo ni uspelo ("+e.message+"). Je pomočnik še zagnan? Poskusim ob naslednji spremembi.");
+  }finally{
+    syncBusy=false;
+    if(syncAgain){syncAgain=false;syncNow()}
+  }
+}
+function setFromServer(list){
+  jobs=list;synced=new Map(jobs.map(j=>[j.id,JSON.stringify(j)]));
+}
+// osveži seznam iz baze (pomočnik ga lahko spremeni v ozadju), a samo, ko ni neshranjenih sprememb
+async function refreshFromServer(){
+  if(MODE!=="server"||syncBusy)return;
+  const p=pendingChanges();if(p.upsert.length||p.del.length)return;
+  try{
+    const d=await (await fetch("/api/jobs")).json();
+    if(!d.ok)return;
+    const p2=pendingChanges();if(p2.upsert.length||p2.del.length)return; // uporabnik je medtem kaj spremenil
+    setFromServer(d.jobs);render();
+  }catch(e){}
+}
+async function initServer(){
+  const d=await (await fetch("/api/jobs")).json();
+  if(!d.ok)throw new Error(d.error);
+  if(d.initialized){
+    let pending=null;try{pending=JSON.parse(localStorage.getItem(PENDING)||"null")}catch(e){}
+    if(pending&&(pending.upsert?.length||pending.delete?.length)){
+      await postBatch(pending);
+      try{localStorage.removeItem(PENDING)}catch(e){}
+      setFromServer((await (await fetch("/api/jobs")).json()).jobs);
+      return `Shranjene spremembe, ki prej niso prišle v bazo: ${pending.upsert.length+pending.delete.length}`;
+    }
+    setFromServer(d.jobs);return "";
+  }
+  // prvi zagon z bazo: prenesi seznam iz tega brskalnika ali naloži primere
+  const local=readLocal();
+  const initial=(local||seed()).filter(j=>j&&j.url).map(j=>/^[A-Za-z0-9_-]{1,64}$/.test(j.id||"")?j:{...j,id:uid()});
+  await postBatch({upsert:initial,delete:[],init:true});
+  const d2=await (await fetch("/api/jobs")).json();
+  setFromServer(d2.jobs);
+  return local?`V bazo prenesenih oglasov iz brskalnika: ${initial.length}`:"";
+}
 
 // število koledarskih dni do roka (0 = danes, negativno = potekel)
 function daysLeft(d){
@@ -259,15 +350,17 @@ function daysLeft(d){
 function fmtDate(d){if(!d)return"";const [y,m,dd]=d.split("-");return `${+dd}. ${+m}. ${y}`}
 function dlText(dl){return dl<0?"potekel":dl===0?"danes":dl===1?"jutri":`še ${dl} dni`}
 function isActive(j){return j.status==="new"||j.status==="interesting"}
-function isSoon(j){const d=daysLeft(j.deadline);return isActive(j)&&d!==null&&d>=0&&d<=7}
+function isGone(j){return j.checkState==="gone"} // pomočnik je ugotovil, da oglas ni več objavljen
+function isSoon(j){const d=daysLeft(j.deadline);return isActive(j)&&!isGone(j)&&d!==null&&d>=0&&d<=7}
 
 // slovenska ednina, dvojina in množina: 1 oglas, 2 oglasa, 3 oglasi, 5 oglasov, 101 oglas …
 function oglasov(n){const r=n%100;return r===1?"oglas":r===2?"oglasa":r===3||r===4?"oglasi":"oglasov"}
 function renderBanner(){
-  const act=jobs.filter(j=>isActive(j)&&j.deadline).map(j=>({j,d:daysLeft(j.deadline)}));
+  const act=jobs.filter(j=>isActive(j)&&!isGone(j)&&j.deadline).map(j=>({j,d:daysLeft(j.deadline)}));
   const urgent=act.filter(x=>x.d>=0&&x.d<=3).sort((a,b)=>a.d-b.d);
   const expired=act.filter(x=>x.d<0).length;
-  if(!urgent.length&&!expired){$("banner").innerHTML="";return}
+  const gone=jobs.filter(j=>isActive(j)&&isGone(j)).length;
+  if(!urgent.length&&!expired&&!gone){$("banner").innerHTML="";return}
   let html="";
   if(urgent.length){
     html+=`<b>⏰ Rok prijave v 3 dneh: ${urgent.length} ${oglasov(urgent.length)}</b><ul>`+
@@ -275,7 +368,9 @@ function renderBanner(){
       (urgent.length>6?`<li>… in še ${urgent.length-6}</li>`:"")+`</ul>`;
   }
   if(expired)html+=`<div${urgent.length?' style="margin-top:6px"':""}>Potekli oglasi, ki še niso prijavljeni ali zavrnjeni: ${expired}</div>`;
-  $("banner").innerHTML=`<div class="banner" id="bannerBox" title="Klikni za prikaz oglasov z rokom v 7 dneh">${html}</div>`;
+  if(gone)html+=`<div${urgent.length||expired?' style="margin-top:6px"':""}>⚠ Oglasi za pregled, ki niso več objavljeni: ${gone}</div>`;
+  const target=urgent.length?"soon":gone?"gone":"soon";
+  $("banner").innerHTML=`<div class="banner" id="bannerBox" data-f="${target}" title="Klikni za prikaz teh oglasov">${html}</div>`;
 }
 
 function render(){
@@ -286,14 +381,18 @@ function render(){
   STATUSES.forEach(s=>counts[s.id]=jobs.filter(j=>j.status===s.id).length);
   counts.star=jobs.filter(j=>j.star).length;
   counts.soon=jobs.filter(isSoon).length;
-  const chipDefs=[{id:"all",label:"Vsi"},{id:"soon",label:"⏰ Rok v 7 dneh"},...STATUSES,{id:"star",label:"★ Z zvezdico"}];
+  counts.gone=jobs.filter(isGone).length;
+  if(filter==="gone"&&!counts.gone)filter="all";
+  const chipDefs=[{id:"all",label:"Vsi"},{id:"soon",label:"⏰ Rok v 7 dneh"},...STATUSES,{id:"star",label:"★ Z zvezdico"},
+    ...(counts.gone?[{id:"gone",label:"⚠ Ni več objavljen"}]:[])];
   $("chips").innerHTML=chipDefs.map(c=>`<span class="chip ${filter===c.id?"on":""}" data-f="${c.id}">${esc(c.label)} (${counts[c.id]||0})</span>`).join("");
 
   const q=$("search").value.trim().toLowerCase();
   let rows=jobs.filter(j=>{
     if(filter==="star"&&!j.star)return false;
     if(filter==="soon"&&!isSoon(j))return false;
-    if(filter!=="all"&&filter!=="star"&&filter!=="soon"&&j.status!==filter)return false;
+    if(filter==="gone"&&!isGone(j))return false;
+    if(STATUSES.some(s=>s.id===filter)&&j.status!==filter)return false;
     if(q&&!(`${j.title} ${j.company} ${j.location} ${j.type} ${j.notes} ${j.salary}`.toLowerCase().includes(q)))return false;
     return true;
   });
@@ -314,9 +413,13 @@ function render(){
       dlHtml=`<div class="dlbox none">rok ni vnesen</div>`;
     }else{
       const cls=dl<0?"over":dl<=3?"soon":"";
-      dlHtml=`<div class="dlbox ${cls}" title="${j.dlApprox?"Približen rok, ocenjen iz podatka »še X dni« na portalu":"Rok prijave"}"><div class="d1">${j.dlApprox?"~":""}${esc(fmtDate(j.deadline))}</div><div class="d2">${dlText(dl)}</div></div>`;
+      const checked=j.checkedAt?` · oglas preverjen ${fmtDate(isoDate(j.checkedAt))}`:"";
+      dlHtml=`<div class="dlbox ${cls}" title="${j.dlApprox?"Približen rok, ocenjen iz podatka »še X dni« na portalu":"Rok prijave"}${esc(checked)}"><div class="d1">${j.dlApprox?"~":""}${esc(fmtDate(j.deadline))}</div><div class="d2">${dlText(dl)}</div></div>`;
     }
-    const meta=[j.company&&`<span>🏢 ${esc(j.company)}</span>`,j.location&&`<span>📍 ${esc(j.location)}</span>`,j.type&&`<span>📄 ${esc(j.type)}</span>`,j.salary&&`<span>💶 ${esc(j.salary)}</span>`].filter(Boolean).join("");
+    const since=(j.status==="applied"||j.status==="waiting")&&j.statusAt
+      ?`<span>📨 ${j.status==="applied"?"prijavljeno":"čakam od"} ${esc(fmtDate(isoDate(j.statusAt)))}</span>`:"";
+    const gone=isGone(j)?`<span class="gone" title="${esc(j.checkMsg||"")}">⚠ oglas ni več objavljen (preverjeno ${esc(fmtDate(isoDate(j.checkedAt)))})</span>`:"";
+    const meta=[gone,j.company&&`<span>🏢 ${esc(j.company)}</span>`,j.location&&`<span>📍 ${esc(j.location)}</span>`,j.type&&`<span>📄 ${esc(j.type)}</span>`,j.salary&&`<span>💶 ${esc(j.salary)}</span>`,since].filter(Boolean).join("");
     const opts=STATUSES.map(s=>`<option value="${s.id}" ${s.id===j.status?"selected":""}>${esc(s.label)}</option>`).join("");
     return `<div class="card ${j.status==="rejected"?"rejected":""}" data-id="${j.id}">
       <button class="star ${j.star?"on":""}" data-a="star" title="Zvezdica">${j.star?"★":"☆"}</button>
@@ -347,7 +450,10 @@ function toast(msg,undo){
 
 // events
 $("chips").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;filter=c.dataset.f;render()});
-$("banner").addEventListener("click",()=>{filter="soon";render();window.scrollTo({top:0,behavior:"smooth"})});
+$("banner").addEventListener("click",e=>{
+  const box=e.target.closest("[data-f]");if(!box)return;
+  filter=box.dataset.f;render();window.scrollTo({top:0,behavior:"smooth"});
+});
 $("demoBar").addEventListener("click",e=>{if(e.target.id==="btnRemoveDemo")removeDemo()});
 $("search").addEventListener("input",render);
 $("sort").addEventListener("change",render);
@@ -541,13 +647,54 @@ $("btnEnrichAll").addEventListener("click",async()=>{
 const HINT_OFF="Prilepi eno ali več povezav (mojedelo.com, ZRSZ ali Optius, vsaka v svoji vrstici). Samodejno branje podatkov ni aktivno: zaženi mojedelo_pomocnik.py in odpri stran na http://localhost:8765. Do takrat podatke dopolni z »Uredi«.";
 const HINT_ON="Prilepi eno ali več povezav (vsaka v svoji vrstici). Podprti so mojedelo.com, ZRSZ (ess.gov.si) in Optius. Naslov, podjetje, kraj, rok, naloge in zahteve se preberejo samodejno.";
 $("addHint").textContent=HINT_OFF;
-if(location.protocol.startsWith("http")){
-  fetch("/api/ping").then(r=>r.json()).then(j=>{
-    if(j&&j.ok){HELPER=true;$("btnEnrichAll").hidden=false;$("addHint").textContent=HINT_ON;render()}
-  }).catch(()=>{});
-}
 
-load();render();
+async function init(){
+  let ping=null;
+  if(location.protocol.startsWith("http")){
+    try{ping=await (await fetch("/api/ping")).json()}catch(e){}
+  }
+  if(ping&&ping.ok){HELPER=true;$("btnEnrichAll").hidden=false;$("addHint").textContent=HINT_ON}
+  let msg="";
+  if(ping&&ping.storage==="sqlite"){
+    try{msg=await initServer();MODE="server"}
+    catch(e){load();msg="Baze ni bilo mogoče odpreti, seznam je začasno shranjen v brskalniku."}
+  }else load();
+  $("btnCheck").hidden=!(MODE==="server"&&ping.check);
+  $("subStore").textContent=MODE==="server"
+    ?"Shranjeno v bazi oglasi.db na tem računalniku, vsak dan se naredi varnostna kopija."
+    :"Shranjeno lokalno v tem brskalniku. Redno naredi izvoz (JSON), da ne izgubiš podatkov.";
+  render();
+  if(msg)toast(msg);
+}
+$("btnCheck").addEventListener("click",async()=>{
+  const btn=$("btnCheck");btn.disabled=true;
+  try{
+    await syncNow(); // najprej shrani morebitne spremembe, da jih osvežitev ne povozi
+    await (await fetch("/api/check",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})).json();
+    let s;
+    do{
+      await new Promise(r=>setTimeout(r,1500));
+      s=await (await fetch("/api/check")).json();
+      toast(`Preverjam oglase … ${s.done}/${s.total}`);
+    }while(s.running);
+    const before=new Set(jobs.filter(isGone).map(j=>j.id));
+    await refreshFromServer();
+    const newGone=jobs.filter(j=>isGone(j)&&!before.has(j.id)).length;
+    toast(`Preverjenih oglasov: ${s.total}`+(newGone?` · na novo ni več objavljenih: ${newGone}`:" · brez novih sprememb"));
+  }catch(e){toast("Preverjanje ni uspelo: pomočnik ni dosegljiv")}
+  finally{btn.disabled=false}
+});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refreshFromServer()});
+setInterval(refreshFromServer,5*60*1000);
+// pred zaprtjem strani pošlji še neshranjene spremembe
+window.addEventListener("pagehide",()=>{
+  if(MODE!=="server")return;
+  const {upsert,del}=pendingChanges();
+  if(!upsert.length&&!del.length)return;
+  try{localStorage.setItem(PENDING,JSON.stringify({upsert,delete:del}))}catch(e){} // počisti se ob naslednjem zagonu
+  fetch("/api/jobs/batch",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:JSON.stringify({upsert,delete:del})});
+});
+init();
 </script>
 </body>
 </html>
