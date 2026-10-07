@@ -115,7 +115,8 @@ Every portal adapter returns the same shape:
 - **Page and background check never overwrite each other.** The page only sends ads that changed since the last save. Fields set by the helper (`statusAt`, `checkedAt`, `checkState`) cannot be written by the page, and the check only replaces a missing or estimated deadline, never one entered by hand.
 - **Nothing is lost when the helper is down.** Unsaved changes are kept in the browser and sent on the next start.
 - **User data wins.** Automatically generated notes are tracked separately (`autoNotes`); once you edit a note, re-reading the ad will not touch it.
-- **No dependencies.** Standard library only (`http.server`, `sqlite3`, `urllib`); notifications go through PowerShell on Windows, `osascript` on macOS and `notify-send` on Linux.
+- **Notifications without tripping antivirus.** The first version showed Windows notifications through a hidden PowerShell process, which antivirus software (Avast) blocked as a suspicious command line. Windows notifications now call the Win32 API directly (`Shell_NotifyIconW` via `ctypes`), with no child process. macOS uses `osascript`, Linux `notify-send`.
+- **No dependencies.** Standard library only (`http.server`, `sqlite3`, `urllib`, `ctypes`).
 
 ## Tests
 

@@ -1,4 +1,3 @@
-import base64
 from datetime import date
 
 import pytest
@@ -141,20 +140,19 @@ def test_checker_refuses_parallel_run(store):
     assert ch.check(TODAY) is True
 
 
-def test_windows_notification_command(monkeypatch):
-    seen = {}
-
-    class R:
-        returncode = 0
-
-    def fake_run(cmd, env=None, **kw):
-        seen.update(cmd=cmd, env=env)
-        return R()
-
+def test_windows_notification_does_not_spawn_processes(monkeypatch):
+    # PowerShell, skrito zagnan iz drugega programa, protivirusni programi blokirajo; Windows gre prek ctypes
+    seen = []
     monkeypatch.setattr(pr.sys, "platform", "win32")
-    monkeypatch.setattr(pr.subprocess, "run", fake_run)
-    assert pr.notify("Rok <prijave>", "Skladiščnik & co – jutri", "http://localhost:8765/")
-    assert seen["cmd"][0] == "powershell" and "-EncodedCommand" in seen["cmd"]
-    # besedilo gre prek okolja v base64, ne v ukazno vrstico ali XML
-    assert base64.b64decode(seen["env"]["MDP_BODY"]).decode("utf-8") == "Skladiščnik & co – jutri"
-    assert "Skladiščnik" not in " ".join(seen["cmd"])
+    monkeypatch.setattr(pr, "_notify_windows", lambda *a: seen.append(a) or True)
+    monkeypatch.setattr(pr.subprocess, "run", lambda *a, **k: pytest.fail("ne sme zagnati procesa"))
+    assert pr.notify("Rok prijave", "Skladiščnik – jutri", "http://localhost:8765/")
+    assert seen == [("Rok prijave", "Skladiščnik – jutri", "http://localhost:8765/")]
+
+
+def test_notification_failure_is_not_fatal(monkeypatch):
+    def boom(*a):
+        raise RuntimeError("ni namizja")
+    monkeypatch.setattr(pr.sys, "platform", "win32")
+    monkeypatch.setattr(pr, "_notify_windows", boom)
+    assert pr.notify("a", "b") is False

@@ -9,8 +9,6 @@ Samodejno delo pomočnika v ozadju (samo standardna knjižnica):
 
 Branje oglasa in pošiljanje obvestil sta podana kot funkciji, zato se da vse preizkusiti brez omrežja.
 """
-import base64
-import os
 import shutil
 import subprocess
 import sys
@@ -103,26 +101,113 @@ def gone_text(jobs):
 
 # ------------------------------------------------------------------ obvestila
 
-# PowerShell skripta za obvestilo Windows 10/11. Besedilo pride prek okolja (base64), zato ga ni treba ubežati,
-# v XML pa se vstavi kot besedilni vozel. AppId je PowerShell, ki je v sistemu že registriran za obvestila.
-TOAST_PS = r"""
-[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
-[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] > $null
-function D($v) { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($v)) }
-$x = New-Object Windows.Data.Xml.Dom.XmlDocument
-$x.LoadXml('<toast activationType="protocol"><visual><binding template="ToastGeneric"><text/><text/></binding></visual></toast>')
-if ($env:MDP_URL) { $x.DocumentElement.SetAttribute('launch', (D $env:MDP_URL)) }
-$t = $x.GetElementsByTagName('text')
-$t.Item(0).AppendChild($x.CreateTextNode((D $env:MDP_TITLE))) > $null
-$t.Item(1).AppendChild($x.CreateTextNode((D $env:MDP_BODY))) > $null
-$app = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe'
-[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($app).Show(
-    [Windows.UI.Notifications.ToastNotification]::new($x))
-"""
+# Windows: obvestilo prek ikone v območju za obvestila (Shell_NotifyIconW) s ctypes; Windows 10/11 ga prikaže
+# kot običajno obvestilo. Namenoma brez PowerShella: skrit zagon PowerShella iz drugega programa
+# (z -EncodedCommand ali -ExecutionPolicy Bypass) protivirusni programi blokirajo kot sumljiv.
+WM_USER = 0x0400
+CALLBACK_MSG = WM_USER + 20
+NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK = 0x0403, 0x0404, 0x0405
+NIM_ADD, NIM_DELETE = 0, 2
+NIF_MESSAGE, NIF_ICON, NIF_TIP, NIF_INFO = 0x01, 0x02, 0x04, 0x10
+NIIF_INFO = 0x01
+IDI_INFORMATION = 32516
+PM_REMOVE = 0x0001
 
 
-def _b64(s):
-    return base64.b64encode(s.encode("utf-8")).decode("ascii")
+def _notify_windows(title, body, url=None, max_seconds=15):
+    import ctypes
+    from ctypes import wintypes as w
+
+    user32, shell32, kernel32 = ctypes.windll.user32, ctypes.windll.shell32, ctypes.windll.kernel32
+    LRESULT = ctypes.c_ssize_t
+    WNDPROC = ctypes.WINFUNCTYPE(LRESULT, w.HWND, w.UINT, w.WPARAM, w.LPARAM)
+
+    class WNDCLASSW(ctypes.Structure):
+        _fields_ = [("style", w.UINT), ("lpfnWndProc", WNDPROC), ("cbClsExtra", ctypes.c_int),
+                    ("cbWndExtra", ctypes.c_int), ("hInstance", w.HINSTANCE), ("hIcon", w.HICON),
+                    ("hCursor", w.HANDLE), ("hbrBackground", w.HBRUSH), ("lpszMenuName", w.LPCWSTR),
+                    ("lpszClassName", w.LPCWSTR)]
+
+    class GUID(ctypes.Structure):
+        _fields_ = [("Data1", w.DWORD), ("Data2", w.WORD), ("Data3", w.WORD), ("Data4", w.BYTE * 8)]
+
+    class NOTIFYICONDATAW(ctypes.Structure):
+        _fields_ = [("cbSize", w.DWORD), ("hWnd", w.HWND), ("uID", w.UINT), ("uFlags", w.UINT),
+                    ("uCallbackMessage", w.UINT), ("hIcon", w.HICON), ("szTip", w.WCHAR * 128),
+                    ("dwState", w.DWORD), ("dwStateMask", w.DWORD), ("szInfo", w.WCHAR * 256),
+                    ("uTimeoutOrVersion", w.UINT), ("szInfoTitle", w.WCHAR * 64), ("dwInfoFlags", w.DWORD),
+                    ("guidItem", GUID), ("hBalloonIcon", w.HICON)]
+
+    # brez argtypes ctypes na 64-bitnem sistemu napačno prenaša ročaje in kazalce
+    user32.DefWindowProcW.argtypes = [w.HWND, w.UINT, w.WPARAM, w.LPARAM]
+    user32.DefWindowProcW.restype = LRESULT
+    user32.RegisterClassW.argtypes = [ctypes.POINTER(WNDCLASSW)]
+    user32.RegisterClassW.restype = w.ATOM
+    user32.UnregisterClassW.argtypes = [w.LPCWSTR, w.HINSTANCE]
+    user32.CreateWindowExW.argtypes = [w.DWORD, w.LPCWSTR, w.LPCWSTR, w.DWORD, ctypes.c_int, ctypes.c_int,
+                                       ctypes.c_int, ctypes.c_int, w.HWND, w.HMENU, w.HINSTANCE, w.LPVOID]
+    user32.CreateWindowExW.restype = w.HWND
+    user32.DestroyWindow.argtypes = [w.HWND]
+    user32.LoadIconW.argtypes = [w.HINSTANCE, ctypes.c_void_p]
+    user32.LoadIconW.restype = w.HICON
+    user32.PeekMessageW.argtypes = [ctypes.POINTER(w.MSG), w.HWND, w.UINT, w.UINT, w.UINT]
+    user32.TranslateMessage.argtypes = [ctypes.POINTER(w.MSG)]
+    user32.DispatchMessageW.argtypes = [ctypes.POINTER(w.MSG)]
+    shell32.Shell_NotifyIconW.argtypes = [w.DWORD, ctypes.POINTER(NOTIFYICONDATAW)]
+    shell32.Shell_NotifyIconW.restype = w.BOOL
+    kernel32.GetModuleHandleW.argtypes = [w.LPCWSTR]
+    kernel32.GetModuleHandleW.restype = w.HMODULE
+
+    state = {"done": False, "clicked": False}
+
+    def proc(hwnd, msg, wparam, lparam):
+        if msg == CALLBACK_MSG:
+            event = lparam & 0xFFFF
+            if event == NIN_BALLOONUSERCLICK:
+                state["clicked"] = state["done"] = True
+            elif event in (NIN_BALLOONTIMEOUT, NIN_BALLOONHIDE):
+                state["done"] = True
+            return 0
+        return user32.DefWindowProcW(hwnd, msg, wparam, lparam)
+
+    wndproc = WNDPROC(proc)  # referenca mora živeti, dokler okno obstaja
+    hinst = kernel32.GetModuleHandleW(None)
+    cls_name = f"MojeDeloObvestilo{threading.get_ident()}{time.monotonic_ns()}"
+    wc = WNDCLASSW(lpfnWndProc=wndproc, hInstance=hinst, lpszClassName=cls_name)
+    if not user32.RegisterClassW(ctypes.byref(wc)):
+        return False
+    hwnd = user32.CreateWindowExW(0, cls_name, "Upravljalnik oglasov", 0, 0, 0, 0, 0, None, None, hinst, None)
+    if not hwnd:
+        user32.UnregisterClassW(cls_name, hinst)
+        return False
+    nid = NOTIFYICONDATAW()
+    nid.cbSize = ctypes.sizeof(NOTIFYICONDATAW)
+    nid.hWnd, nid.uID = hwnd, 1
+    nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_INFO
+    nid.uCallbackMessage = CALLBACK_MSG
+    nid.hIcon = user32.LoadIconW(None, IDI_INFORMATION)
+    nid.szTip = "Upravljalnik oglasov"
+    nid.szInfoTitle, nid.szInfo = title[:63], body[:255]
+    nid.dwInfoFlags = NIIF_INFO
+    try:
+        if not shell32.Shell_NotifyIconW(NIM_ADD, ctypes.byref(nid)):
+            return False
+        # počakaj, da obvestilo izgine ali ga uporabnik klikne (ikona mora do takrat ostati)
+        msg = w.MSG()
+        end = time.monotonic() + max_seconds
+        while not state["done"] and time.monotonic() < end:
+            while user32.PeekMessageW(ctypes.byref(msg), hwnd, 0, 0, PM_REMOVE):
+                user32.TranslateMessage(ctypes.byref(msg))
+                user32.DispatchMessageW(ctypes.byref(msg))
+            time.sleep(0.1)
+        if state["clicked"] and url:
+            import webbrowser
+            webbrowser.open(url)
+        return True
+    finally:
+        shell32.Shell_NotifyIconW(NIM_DELETE, ctypes.byref(nid))
+        user32.DestroyWindow(hwnd)
+        user32.UnregisterClassW(cls_name, hinst)
 
 
 def notify(title, body, url=None):
@@ -130,19 +215,14 @@ def notify(title, body, url=None):
     print(f"  [OBVESTILO] {title}: {body.replace(chr(10), ' | ')}")
     try:
         if sys.platform == "win32":
-            env = dict(os.environ, MDP_TITLE=_b64(title), MDP_BODY=_b64(body), MDP_URL=_b64(url or ""))
-            cmd = ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
-                   "-EncodedCommand", base64.b64encode(TOAST_PS.encode("utf-16-le")).decode("ascii")]
-            r = subprocess.run(cmd, env=env, capture_output=True, timeout=30,
-                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-            return r.returncode == 0
+            return _notify_windows(title, body, url)
         if sys.platform == "darwin":
             script = ["-e", "on run argv", "-e", "display notification (item 2 of argv) with title (item 1 of argv)",
                       "-e", "end run"]
             return subprocess.run(["osascript", *script, title, body], timeout=30).returncode == 0
         if shutil.which("notify-send"):
             return subprocess.run(["notify-send", title, body], timeout=30).returncode == 0
-    except (OSError, subprocess.SubprocessError) as e:
+    except Exception as e:  # obvestilo ne sme nikoli ustaviti preverjanja
         print(f"  Obvestila ni bilo mogoče prikazati: {e}")
     return False
 
