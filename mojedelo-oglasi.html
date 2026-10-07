@@ -33,6 +33,7 @@ button.small{padding:4px 9px;font-size:13px}
 .banner{background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:14px;cursor:pointer}
 .banner b{font-weight:700}
 .banner ul{margin:6px 0 0;padding-left:18px}
+.demo{background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent);border-radius:10px;padding:8px 14px;margin-bottom:14px;font-size:14px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 .chip{border-radius:999px;padding:4px 12px;font-size:13px;background:var(--card);border:1px solid var(--line);cursor:pointer}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
@@ -71,8 +72,9 @@ dialog h2{margin:0 0 12px;font-size:18px}
 <body>
 <div class="wrap">
   <h1>Moja delovna mesta</h1>
-  <p class="sub">Shranjeno lokalno v tem brskalniku. Redno naredi izvoz (JSON), da ne izgubiš podatkov. Rok s predpono ~ je ocenjen iz podatka »še X dni« na portalu (stanje 5. 10. 2026).</p>
+  <p class="sub">Shranjeno lokalno v tem brskalniku. Redno naredi izvoz (JSON), da ne izgubiš podatkov. Rok s predpono ~ je ocenjen iz podatka »še X dni« na portalu.</p>
 
+  <div id="demoBar"></div>
   <div id="banner"></div>
 
   <div class="bar">
@@ -94,9 +96,10 @@ dialog h2{margin:0 0 12px;font-size:18px}
     <button id="btnExport">Izvoz JSON</button>
     <button id="btnCsv">Izvoz CSV (Excel)</button>
     <button id="btnImport">Uvoz JSON</button>
+    <button id="btnIcs" title="Roki aktivnih oglasov kot dogodki z opomniki 3 dni in 1 dan prej">Izvoz v koledar (.ics)</button>
     <button id="btnEnrichAll" hidden>Dopolni manjkajoče podatke</button>
     <input type="file" id="fileImport" accept=".json,application/json" hidden>
-    <button class="danger" id="btnReset">Ponastavi na začetni seznam</button>
+    <button class="danger" id="btnReset">Ponastavi na primere</button>
   </div>
 </div>
 
@@ -141,45 +144,26 @@ const STATUSES=[
   {id:"rejected",label:"Ni zame"}
 ];
 const STORE="mojedelo_oglasi_v1";
-const VER_KEY="mojedelo_seed_ver";
-const SEED_VERSION=3;
 
-// [url, naslov, podjetje, kraj, vrsta zaposlitve, rok (YYYY-MM-DD), rok je ocenjen, opombe]
+// Primeri ob prvem zagonu (izmišljena podjetja). Rok je zamik v dneh od danes, da primeri nikoli ne zastarajo.
+// [pot, naslov, podjetje, kraj, vrsta zaposlitve, rok (dni od danes ali null), rok je ocenjen, plača, status, zvezdica, opombe]
 const SEED=[
- ["https://www.mojedelo.com/oglas/skladiscno-proizvodni-delavec-mz/626e175a-8b26-4817-885f-25061b00566d","Skladiščno proizvodni delavec (m/ž)","ARCONT d.d.","Gornja Radgona","določen ali nedoločen čas","2026-10-24",true,
-  "Objavljeno 25. 9. 2026. IV. stopnja (ali nižja z ustreznimi izkušnjami), zaželene izkušnje z viličarjem (izpit možen naknadno), osnovno računalniško znanje in delo s skenerjem. Pakiranje rezervnih delov, skladiščenje, interni prevozi z viličarjem."],
- ["https://www.mojedelo.com/oglas/komisionar-mz/c9d763cf-3277-4ead-a81c-c7bf0909886a","Komisionar (m/ž)","ARCONT d.d.","Gornja Radgona","določen ali nedoločen čas, triizmensko delo (pon–pet)","2026-10-24",true,
-  "Objavljeno 25. 9. 2026. Oskrba montažne linije z materialom, viličar (izpit možen pred zaposlitvijo), dobra fizična pripravljenost, nekaj delovnih izkušenj."],
- ["https://www.mojedelo.com/oglas/skladiscnik-mz-tc-merkur-murska-sobota/14416613-0c78-4ff3-a127-6c1ce12d5088","Skladiščnik (m/ž) – TC Merkur Murska Sobota","MERKUR trgovina, d.o.o.","Murska Sobota","nedoločen čas (6 mes. poskusna doba), 2 izmeni","2026-10-11",false,
-  "Objavljeno 25. 9. 2026. Rok prijave je v oglasu naveden izrecno. Prevzem, komisioniranje, viličar (izpit je prednost), osnovno znanje Word/Excel/Outlook, potrdilo o nekaznovanosti."],
- ["https://www.mojedelo.com/oglas/uxui-oblikovalec-mz/cd54ab7b-82f8-454d-a200-725d269ac203","UX/UI oblikovalec (m/ž)","Cosylab d.d.","Slovenija","","2026-10-15",true,
-  "Objavljeno 25. 9. 2026. Medicinska programska oprema za radioterapijo. Zahtevano vsaj 3 leta izkušenj z UX/UI, odlično poznavanje Figme/Sketcha."],
- ["https://www.mojedelo.com/oglas/voznik-vilicarja-mzd/f07ef237-decf-4faa-93a5-4a10fc27309e","Voznik viličarja (m/ž/d)","PALFINGER d.o.o.","Maribor","","2026-10-11",true,
-  "Objavljeno 25. 9. 2026. Srednješolska izobrazba, osnovno računalniško znanje (MS Office, SAP), izkušnje z vožnjo viličarja."],
- ["https://www.mojedelo.com/oglas/it-inzenir-za-erp-sisteme-in-poslovne-aplikacije-juniormid-mz-v-gornji-radgoni/d767ec67-7b57-4cf5-b494-00c7a8418070","IT inženir za ERP sisteme in poslovne aplikacije (junior/mid) (m/ž)","ELRAD Electronics, d.o.o.","Gornja Radgona","","2026-10-14",true,
-  "Objavljeno 15. 9. 2026. ERP Infor, SQL, EDI povezave, Power Platform. Zahtevano osnovno znanje programiranja (C#, Java, Python, JS, .NET ali podobno), osnove SQL, dobra angleščina. Fleksibilen delovni čas, občasno delo od doma. Kontakt: Jasmina Vohar, 041 900 778."],
- ["https://www.mojedelo.com/oglas/procesnicar-svr-mz/9dd3d9cf-1094-47ca-a5a5-561c857e0b5a","Procesničar SVR (m/ž)","ALBAUGH TKI d.o.o.","Rače","polni delovni čas","2026-10-07",true,
-  "Objavljeno 8. 9. 2026. Srednje poklicno izobraževanje (zaželena tehnična smer), vozniški izpit B, potrdilo o nekaznovanosti, zaželen izpit za viličarja. Prijava v slovenščini."],
- ["https://www.mojedelo.com/oglas/avtomehanik-mz-v-podrocju-vzdrzevanja-v-acb-murska-sobota/80698c2a-300b-4a53-9189-a34bbace689d","Avtomehanik (m/ž) v področju vzdrževanja v ACB Murska Sobota","DARS - Družba za avtoceste RS","ACB Murska Sobota (tudi ACB Maribor, izpostava Ptuj)","","2026-10-22",true,
-  "Objavljeno 22. 9. 2026. 4. stopnja tehnične smeri (ali 3. stopnja + 2 leti izkušenj), vozniški izpit B; zaželena C in E kategorija."],
- ["https://www.mojedelo.com/oglas/it-svetovalec-razvijalec-mz-hibridno-delo-celotna-slovenija/05e90325-ba51-4594-b954-c76c4651e071","IT svetovalec/razvijalec (m/ž) – hibridno delo, cela Slovenija","Novum-RGI Germany GmbH, podružnica Maribor","Maribor (hibridno, cela Slovenija)","nedoločen čas (3 mes. poskusna doba)","2026-10-22",true,
-  "Objavljeno 22. 9. 2026. Vsaj VI. stopnja računalništva ali sorodne smeri, Java EE, SQL, modeliranje. Aktivna angleščina, nemščina je prednost. Zavarovalniški sektor. Delo od doma, prilagodljiv delovni čas."],
- ["https://www.mojedelo.com/oglas/skladiscnik-mz/8745c4fc-d022-4460-995d-610ffc4bdf1d","Skladiščnik (m/ž)","Simes, d.o.o.","Celje","","2026-10-17",true,
-  "Objavljeno 18. 9. 2026. Strojniško znanje, poznavanje strojnega materiala, vodenje evidence zalog, priprava materiala za objekte."],
- ["https://www.mojedelo.com/oglas/skladiscnik/83af1cc8-cd2b-4977-b1a9-3c41746f5a37","Skladiščnik","REFLEX Gornja Radgona d.o.o.","Gornja Radgona","","2026-10-15",true,
-  "Objavljeno 16. 9. 2026. Natovarjanje in raztovarjanje stekla, mostno dvigalo, viličar, vozniški izpit B. Kadrovska: 02/56-43-549 ali 051-646-572."],
- ["https://www.mojedelo.com/oglas/devops-inzenir-operations-manager-mz/38d2a357-d6c0-4882-bb5b-0e6ffa242a5a","DevOps inženir / Operations manager (m/ž)","Raiffeisen Informatik SI d.o.o.","Maribor (hibridno)","nedoločen čas, polni delovni čas","2026-10-10",true,
-  "Objavljeno 11. 9. 2026. Zahtevano vsaj 3 leta izkušenj z DevOps/IT operacijami, CI/CD, Git, cloud (Salesforce prednost), platforma nCino. Dobra angleščina."],
- ["https://www.mojedelo.com/oglas/skladiscnik-tehnike-radenci/cd12b432-7d9a-49e3-a92e-fce0e6aaf222","Skladiščnik tehnike – Radenci","Jagros d.o.o.","Radenci","določen čas z možnostjo podaljšanja za nedoločen","2026-10-08",true,
-  "Objavljeno 9. 9. 2026. V oglasu piše »sprejemamo vloge« brez roka, portal pa kaže še 4 dni. IV./V. stopnja tehnične smeri, prodaja in svetovanje v trgovini, zaželen izpit za viličarja."],
- ["https://www.mojedelo.com/oglas/vilicarist-mz/f641bc77-eeee-4f38-9000-d2a6f525f1f7","Viličarist (m/ž)","Walstead Leykam tiskarna d.o.o.","Zgornje Hoče","možnost nedoločenega časa, triizmensko delo","2026-10-07",true,
-  "Objavljeno 8. 9. 2026. Izkušnje z vožnjo viličarja. Telefon: 02 616 55 36."],
- ["https://www.mojedelo.com/oglas/java-razvijalec-mz/1657ad2f-3739-47ee-b571-725ad47e3e5c","Java razvijalec (m/ž)","SSI Schaefer d.o.o.","Maribor","","2026-10-07",true,
-  "Objavljeno 8. 9. 2026. Visoka strokovna ali univerzitetna izobrazba informatike, Java, osnove baz (Oracle, SQL), WMS (WAMAS), dobra angleščina, osnovna nemščina, potovanja v tujino do 30 % časa."],
- ["https://www.mojedelo.com/oglas/it-logisticni-svetovalec-mz/98db156d-d8e1-4160-b1d5-cbbbb4604d16","IT logistični svetovalec (m/ž)","SSI Schaefer d.o.o.","Maribor","","2026-10-07",true,
-  "Objavljeno 8. 9. 2026. WMS, intralogistika, odlična nemščina (vsaj B2), dobra angleščina, potovanja od 40 % časa."],
- ["https://www.mojedelo.com/oglas/vilicarist-v-logistiki/74b142a0-10d1-498c-aaf2-c12e45898092","Viličarist v logistiki","Henkel Maribor d.o.o.","Maribor","tri izmene","2026-10-07",true,
-  "Objavljeno 8. 9. 2026. Izpit za viličarja je treba opraviti pred začetkom dela, stroške krije podjetje."]
+ ["junior-razvijalec-spletnih-aplikacij","Junior razvijalec spletnih aplikacij (m/ž)","Kvadrat Soft d.o.o.","Murska Sobota (hibridno)","nedoločen čas, polni delovni čas, poskusna doba 6 mes.",2,false,"1.900–2.400 EUR bruto","interesting",true,
+  "Izkušnje: 0 do 1 leto. Naloge: razvoj spletnih aplikacij v JavaScriptu in Pythonu; vzdrževanje REST API-jev; sodelovanje z oblikovalci in testerji. Zahteve: VI. stopnja računalništva ali ustrezne izkušnje; osnove SQL in Git; dobra angleščina."],
+ ["skladiscnik","Skladiščnik (m/ž)","Mlinar Logistika d.o.o.","Lendava","določen čas z možnostjo podaljšanja, dve izmeni",1,false,"","new",false,
+  "Naloge: prevzem in izdaja blaga; komisioniranje; delo z viličarjem. Zahteve: IV. stopnja izobrazbe; izpit za viličarja je prednost."],
+ ["administrator-informacijskih-sistemov","Administrator informacijskih sistemov (m/ž)","Ravnica Tech d.o.o.","Ljutomer","nedoločen čas, polni delovni čas",5,true,"","new",false,
+  "Naloge: skrbništvo strežnikov Windows in Linux; uporabniška podpora; varnostne kopije. Zahteve: V. stopnja tehnične smeri; poznavanje omrežij; vozniški izpit B."],
+ ["podatkovni-analitik","Podatkovni analitik (m/ž)","Breza Analitika d.o.o.","Maribor (delo od doma)","nedoločen čas, polni delovni čas",9,false,"2.400 EUR bruto","interesting",true,
+  "Izkušnje: 1 do 3 leta. Naloge: priprava poročil in nadzornih plošč; čiščenje in povezovanje podatkov. Zahteve: SQL; Python ali R; Power BI je prednost."],
+ ["prodajalec-v-trgovini","Prodajalec v trgovini (m/ž)","Vrtnica Trgovina d.o.o.","Gornja Radgona","krajši delovni čas",14,false,"","new",false,
+  "Naloge: svetovanje kupcem; delo na blagajni; urejanje polic. Zahteve: IV. stopnja izobrazbe; komunikativnost."],
+ ["serviser-hladilne-tehnike","Serviser hladilne tehnike (m/ž)","Gorički Servis d.o.o.","Beltinci","nedoločen čas, terensko delo",21,false,"","applied",false,
+  "Naloge: montaža in servis hladilnih naprav na terenu. Zahteve: IV. ali V. stopnja elektro ali strojne smeri; vozniški izpit B.\nPrijava poslana po e-pošti, odgovor obljubljen v 14 dneh."],
+ ["receptor","Receptor (m/ž)","Sončnica Hotel d.o.o.","Moravske Toplice","sezonsko delo, izmensko",null,false,"","new",false,
+  "Naloge: sprejem gostov; rezervacije; obračun storitev. Zahteve: aktivno znanje angleščine in nemščine."],
+ ["tehnicni-pisec","Tehnični pisec (m/ž)","Kvadrat Soft d.o.o.","Ljubljana","določen čas 12 mesecev",-3,false,"","rejected",false,
+  "Naloge: priprava uporabniških navodil in dokumentacije API. Zahteve: odlična angleščina; VII. stopnja izobrazbe."]
 ];
 
 let jobs=[];let filter="all";let lastDeleted=null;let toastTimer=null;
@@ -216,10 +200,18 @@ function titleFromUrl(u){
     return slug.charAt(0).toUpperCase()+slug.slice(1);
   }catch(e){return "Oglas"}
 }
+function isoInDays(n){
+  const d=new Date();d.setDate(d.getDate()+n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
 function seed(){
   const now=Date.now();
-  // autoNotes = opomba, ki jo je napisal program; dokler je uporabnik ne spremeni, jo sme pomočnik osvežiti
-  return SEED.map((r,i)=>({id:uid(),url:normUrl(r[0]),title:r[1],company:r[2],location:r[3],type:r[4],deadline:r[5],dlApprox:r[6],salary:"",status:"new",star:false,notes:r[7],autoNotes:r[7],added:now-i}));
+  return SEED.map((r,i)=>({id:uid(),url:"https://example.com/oglas/"+r[0],title:r[1],company:r[2],location:r[3],type:r[4],
+    deadline:r[5]===null?"":isoInDays(r[5]),dlApprox:r[6],salary:r[7],status:r[8],star:r[9],notes:r[10],demo:true,added:now-i}));
+}
+function removeDemo(){
+  const n=jobs.length;jobs=jobs.filter(j=>!j.demo);save();render();
+  toast(`Odstranjenih primerov: ${n-jobs.length}`);
 }
 // dopolni samo prazna polja, statusov, zvezdic in lastnih opomb ne spreminja
 function fillEmpty(j,src){
@@ -253,17 +245,10 @@ async function enrich(j){
 function load(){
   let stored=null;
   try{const raw=localStorage.getItem(STORE);if(raw)stored=JSON.parse(raw)}catch(e){}
-  if(!Array.isArray(stored)){jobs=seed();save();saveVer();return}
+  if(!Array.isArray(stored)){jobs=seed();save();return}
   jobs=stored;
-  let ver=0;try{ver=+localStorage.getItem(VER_KEY)||0}catch(e){}
-  if(ver<SEED_VERSION){
-    const byUrl=new Map(jobs.map(j=>[normUrl(j.url),j]));
-    seed().forEach(s=>{const j=byUrl.get(s.url);if(j)fillEmpty(j,s)});
-    save();saveVer();
-  }
 }
 function save(){try{localStorage.setItem(STORE,JSON.stringify(jobs))}catch(e){}}
-function saveVer(){try{localStorage.setItem(VER_KEY,String(SEED_VERSION))}catch(e){}}
 
 // število koledarskih dni do roka (0 = danes, negativno = potekel)
 function daysLeft(d){
@@ -276,6 +261,8 @@ function dlText(dl){return dl<0?"potekel":dl===0?"danes":dl===1?"jutri":`še ${d
 function isActive(j){return j.status==="new"||j.status==="interesting"}
 function isSoon(j){const d=daysLeft(j.deadline);return isActive(j)&&d!==null&&d>=0&&d<=7}
 
+// slovenska ednina, dvojina in množina: 1 oglas, 2 oglasa, 3 oglasi, 5 oglasov, 101 oglas …
+function oglasov(n){const r=n%100;return r===1?"oglas":r===2?"oglasa":r===3||r===4?"oglasi":"oglasov"}
 function renderBanner(){
   const act=jobs.filter(j=>isActive(j)&&j.deadline).map(j=>({j,d:daysLeft(j.deadline)}));
   const urgent=act.filter(x=>x.d>=0&&x.d<=3).sort((a,b)=>a.d-b.d);
@@ -283,7 +270,7 @@ function renderBanner(){
   if(!urgent.length&&!expired){$("banner").innerHTML="";return}
   let html="";
   if(urgent.length){
-    html+=`<b>⏰ Rok prijave v 3 dneh: ${urgent.length} ${urgent.length===1?"oglas":"oglasov"}</b><ul>`+
+    html+=`<b>⏰ Rok prijave v 3 dneh: ${urgent.length} ${oglasov(urgent.length)}</b><ul>`+
       urgent.slice(0,6).map(x=>`<li>${esc(x.j.title)}${x.j.company?` (${esc(x.j.company)})`:""} – ${dlText(x.d)}</li>`).join("")+
       (urgent.length>6?`<li>… in še ${urgent.length-6}</li>`:"")+`</ul>`;
   }
@@ -293,6 +280,8 @@ function renderBanner(){
 
 function render(){
   renderBanner();
+  const demos=jobs.filter(j=>j.demo).length;
+  $("demoBar").innerHTML=demos?`<div class="demo">Prikazani so primeri oglasov (izmišljena podjetja). Svoje oglase dodaš z »+ Dodaj oglase«. <button class="small" id="btnRemoveDemo">Odstrani primere (${demos})</button></div>`:"";
   const counts={all:jobs.length};
   STATUSES.forEach(s=>counts[s.id]=jobs.filter(j=>j.status===s.id).length);
   counts.star=jobs.filter(j=>j.star).length;
@@ -339,7 +328,7 @@ function render(){
       <div class="side">${dlHtml}</div>
       <div class="actions">
         <select data-a="status">${opts}</select>
-        ${HELPER?`<button class="small" data-a="enrich" title="Ponovno prebere oglas in dopolni prazna polja">Dopolni samodejno</button>`:""}
+        ${HELPER&&!j.demo?`<button class="small" data-a="enrich" title="Ponovno prebere oglas in dopolni prazna polja">Dopolni samodejno</button>`:""}
         <button class="small" data-a="edit">Uredi</button>
         <button class="small" data-a="open">Odpri oglas ↗</button>
         <button class="small danger" data-a="del">Odstrani</button>
@@ -359,6 +348,7 @@ function toast(msg,undo){
 // events
 $("chips").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;filter=c.dataset.f;render()});
 $("banner").addEventListener("click",()=>{filter="soon";render();window.scrollTo({top:0,behavior:"smooth"})});
+$("demoBar").addEventListener("click",e=>{if(e.target.id==="btnRemoveDemo")removeDemo()});
 $("search").addEventListener("input",render);
 $("sort").addEventListener("change",render);
 
@@ -496,12 +486,47 @@ $("importMerge").addEventListener("click",()=>finishImport(false));
 $("importReplace").addEventListener("click",()=>finishImport(true));
 // Esc samo zapre dialog; pendingImport ob naslednjem uvozu prepiše nova datoteka
 $("btnReset").addEventListener("click",()=>{
-  if(!confirm("Vsi tvoji vnosi, statusi in opombe bodo zamenjani z začetnim seznamom. Nadaljujem?"))return;
-  jobs=seed();save();saveVer();render();toast("Seznam ponastavljen");
+  if(!confirm("Vsi tvoji vnosi, statusi in opombe bodo zamenjani s primeri. Nadaljujem?"))return;
+  jobs=seed();save();render();toast("Seznam ponastavljen");
+});
+
+// koledar: celodnevni dogodek na dan roka, opomnika ob 9:00 tri dni in en dan prej
+function icsEsc(s){return String(s??"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n")}
+function icsFold(line){
+  // vrstice v .ics so omejene na 75 bajtov; nadaljevanje se začne s presledkom
+  const enc=new TextEncoder();let out="",n=0;
+  for(const ch of line){
+    const b=enc.encode(ch).length;
+    if(n+b>75){out+="\r\n ";n=1}
+    out+=ch;n+=b;
+  }
+  return out;
+}
+function buildIcs(list){
+  const stampDt=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Horvatium//job-ad-tracker//SL","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Roki prijav"];
+  list.forEach(j=>{
+    const start=j.deadline.replace(/-/g,""),end=isoInDays(daysLeft(j.deadline)+1).replace(/-/g,"");
+    const what=j.title+(j.company?` – ${j.company}`:"");
+    const desc=[j.dlApprox?"Rok je ocenjen, preveri ga v oglasu.":"",j.location,j.url,j.notes].filter(Boolean).join("\n\n");
+    L.push("BEGIN:VEVENT",`UID:${j.id}@job-ad-tracker`,`DTSTAMP:${stampDt}`,`DTSTART;VALUE=DATE:${start}`,`DTEND;VALUE=DATE:${end}`,
+      `SUMMARY:${icsEsc("Rok prijave: "+what)}`,`DESCRIPTION:${icsEsc(desc)}`,`URL:${j.url}`,"TRANSP:TRANSPARENT");
+    [["-P2DT15H","čez 3 dni"],["-PT15H","jutri"]].forEach(([trig,when])=>
+      L.push("BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${icsEsc(`Rok prijave ${when}: ${what}`)}`,`TRIGGER:${trig}`,"END:VALARM"));
+    L.push("END:VEVENT");
+  });
+  L.push("END:VCALENDAR");
+  return L.map(icsFold).join("\r\n")+"\r\n";
+}
+$("btnIcs").addEventListener("click",()=>{
+  const list=jobs.filter(j=>!j.demo&&isActive(j)&&j.deadline&&daysLeft(j.deadline)>=0);
+  if(!list.length){toast("Ni oglasov za pregled ali zanimivih z rokom, ki še ni potekel");return}
+  download(`roki-prijav-${stamp()}.ics`,buildIcs(list),"text/calendar;charset=utf-8");
+  toast(`V koledar izvoženih rokov: ${list.length}`);
 });
 
 $("btnEnrichAll").addEventListener("click",async()=>{
-  const todo=jobs.filter(j=>!j.company||!j.deadline||!j.location||!j.notes||j.dlApprox||(j.notes===j.autoNotes&&!j.notes.includes("Naloge:")));
+  const todo=jobs.filter(j=>!j.demo).filter(j=>!j.company||!j.deadline||!j.location||!j.notes||j.dlApprox||(j.notes===j.autoNotes&&!j.notes.includes("Naloge:")));
   if(!todo.length){toast("Vsi oglasi imajo že podjetje, kraj in natančen rok");return}
   let ok=0,fail=0;
   for(let i=0;i<todo.length;i++){

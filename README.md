@@ -9,15 +9,26 @@ A small local-first web app for keeping track of job ads from Slovenian job port
 
 It replaces the "dozens of open browser tabs" workflow with one page.
 
-<!-- TODO: screenshot / short GIF (add ad → deadline → filter) -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
+  <img src="docs/screenshot-light.png" alt="Job list sorted by application deadline, with a warning for ads closing within 3 days" width="800">
+</picture>
+
+**Adding an ad:** paste a link, and the helper fills in the details. Then filter by deadline or status:
+
+<img src="docs/demo.gif" alt="Pasting a mojedelo.com link, the ad is filled in automatically, then filtering by deadline and status" width="800">
+
+<sub>Example ads use fictional companies; the added ad is a real public listing.</sub>
 
 ## Features
 
 - **Paste links, get data**: one or more URLs at a time from [mojedelo.com](https://www.mojedelo.com), [ZRSZ](https://www.ess.gov.si) (Employment Service of Slovenia) and [Optius](https://www.optius.com).
 - **Deadlines first**: deadline badge with days left, warning banner for ads closing within 3 days, "closing in 7 days" filter, default sort by deadline.
 - Status workflow (to review → interesting → applied → waiting → not for me), favourites, notes, search and filters, manual editing of every field.
+- **Calendar reminders**: export deadlines of open ads to an `.ics` file (Google Calendar, Outlook, Apple Calendar), with reminders at 9:00 three days and one day before the deadline. Events have stable UIDs, so re-importing updates them instead of creating duplicates (in apps that support it).
 - Re-reading never overwrites your own notes or manually entered deadlines; estimated deadlines (`~`) are replaced by exact ones when they become available.
 - JSON export/import (replace or merge) and CSV export for Excel (Slovenian locale: `;` separator, UTF-8 BOM).
+- First run shows a few example ads (fictional companies, deadlines relative to today) that can be removed with one click.
 - Works without the helper too (open the HTML file directly), just without automatic reading.
 
 ## Quick start
@@ -81,7 +92,6 @@ Parsers are tested against real responses from each portal saved in `tests/fixtu
 ## Roadmap
 
 - SQLite storage in the helper (with automatic migration from `localStorage`) and backups
-- Deadline reminders and `.ics` calendar export
 - One parser module per portal behind a common interface; a generic JSON-LD `JobPosting` parser for company career pages
 - Daily check whether saved ads are still published
 
