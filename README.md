@@ -1,5 +1,8 @@
 # Job Ad Tracker (mojedelo · ZRSZ · Optius)
 
+[![tests](https://github.com/Horvatium/job-ad-tracker/actions/workflows/tests.yml/badge.svg)](https://github.com/Horvatium/job-ad-tracker/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 > **SL:** Lokalna aplikacija za spremljanje prostih delovnih mest s slovenskih portalov. Prilepiš povezavo do oglasa, aplikacija sama prebere naslov, podjetje, kraj, vrsto zaposlitve in rok prijave ter oglase razvrsti po roku. Podatki ostanejo na tvojem računalniku.
 
 A small local-first web app for keeping track of job ads from Slovenian job portals. Paste a link, and a tiny local Python helper reads the ad (title, employer, location, employment type, salary, application deadline, duties and requirements). The list is sorted by deadline, so no application window is missed.
