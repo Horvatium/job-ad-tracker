@@ -6,14 +6,17 @@ Zagon:   python mojedelo_pomocnik.py      (v Windows tudi:  py mojedelo_pomocnik
 Nato se samodejno odpre http://localhost:8765 in stran ob dodajanju URL-ja
 sama izpolni naslov, podjetje, kraj, vrsto zaposlitve, rok prijave in zahteve.
 
-Podprti portali: mojedelo.com, ZRSZ (ess.gov.si, Iskanje dela) in Optius (optius.com).
-Potrebuje samo Python 3.8+ (brez dodatnih paketov). Program posluša samo na
-tvojem računalniku (127.0.0.1) in bere samo strani na podprtih portalih.
+Portali s posebnim razčlenjevalnikom: mojedelo.com, ZRSZ (ess.gov.si, Iskanje dela) in Optius (optius.com).
+Druge strani (npr. kariera na strani podjetja) bere splošni razčlenjevalnik (JSON-LD JobPosting ali besedilo).
+Potrebuje samo Python 3.8+ (brez dodatnih paketov). Program posluša samo na tvojem računalniku (127.0.0.1)
+in bere samo javne spletne strani, nikoli lokalnega omrežja.
 """
 import html
+import ipaddress
 import json
 import os
 import re
+import socket
 import sys
 import webbrowser
 from datetime import date, datetime, timedelta, timezone
@@ -21,7 +24,7 @@ from html.parser import HTMLParser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urljoin, urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener, urlopen
 
 import mojedelo_baza as baza
 import mojedelo_preverjanje as preverjanje
@@ -172,7 +175,8 @@ DUTY_HEAD = re.compile(
     r"^(vaš(i)? izziv(i)?( bo(do)?)?|vaše delo( bo obsegalo)?|vaše naloge|delovne naloge|"
     r"glavne naloge( in odgovornosti)?|naloge( in odgovornosti)?|opis dela( in nalog)?|"
     r"opis delovnega mesta|obseg dela|tvoji dnevni izzivi( bodo)?|kaj boste delali|"
-    r"vaše odgovornosti|delo obsega|delo bo obsegalo|vaše delo)", re.I)
+    r"vaše odgovornosti|delo obsega|delo bo obsegalo|vaše delo|tvoj[ei] (delo|naloge|izzivi)|"
+    r"opis del( in nalog)?)", re.I)
 
 
 def find_duties(lines, limit=300, fallback=True):
@@ -355,7 +359,16 @@ def extract(markup, today=None):
 # ---------------------------------------------------------------- strežnik
 
 
+def is_web_url(url):
+    try:
+        u = urlparse(url)
+        return u.scheme in ("http", "https") and bool(u.hostname)
+    except ValueError:
+        return False
+
+
 def host_allowed(url):
+    """Portal s posebnim razčlenjevalnikom (vse druge strani bere get_generic)."""
     try:
         u = urlparse(url)
     except Exception:
@@ -864,8 +877,221 @@ def get_optius(url):
     return from_optius(markup)
 
 
+# ------------------------------------------------------------------ strani podjetij in drugi portali
+# Brez posebnega razčlenjevalnika: najprej standardni JSON-LD »JobPosting« (ima ga večina kariernih strani,
+# ker ga uporablja Google for Jobs), sicer hevristike na besedilu strani (»Kraj dela: …«, »Prijave do …«).
+
+class UnsafeURL(ValueError):
+    pass
+
+
+def check_public_url(url):
+    """Pomočnik sme brati samo javne spletne strani: nikoli tega računalnika ali lokalnega omrežja (SSRF)."""
+    try:
+        u = urlparse(url)
+        port = u.port or (443 if u.scheme == "https" else 80)
+    except ValueError:
+        raise UnsafeURL("Neveljavna povezava.")
+    if u.scheme not in ("http", "https") or not u.hostname:
+        raise UnsafeURL("Podprte so samo spletne strani (http ali https).")
+    try:
+        infos = socket.getaddrinfo(u.hostname, port, proto=socket.IPPROTO_TCP)
+    except (socket.gaierror, UnicodeError):
+        raise UnsafeURL(f"Strežnika {u.hostname} ni mogoče najti.")
+    for info in infos:
+        if not ipaddress.ip_address(info[4][0].split("%", 1)[0]).is_global:
+            raise UnsafeURL("Povezave na ta računalnik ali lokalno omrežje niso dovoljene.")
+
+
+class _PublicRedirects(HTTPRedirectHandler):
+    """Preveri tudi vsako preusmeritev, sicer bi javna stran lahko preusmerila na lokalni naslov."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        check_public_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_public_opener = build_opener(_PublicRedirects)
+
+
+def fetch_public(url, timeout=25):
+    """Vrne (status, besedilo, končni URL po preusmeritvah, vrsta vsebine)."""
+    check_public_url(url)
+    h = {"User-Agent": UA, "Accept-Language": "sl-SI,sl;q=0.9,en;q=0.5", "Accept": "text/html,*/*;q=0.5"}
+    try:
+        with _public_opener.open(Request(url, headers=h), timeout=timeout) as r:
+            raw = r.read(MAX_BYTES)
+            cs = r.headers.get_content_charset() or "utf-8"
+            return r.status, raw.decode(cs, errors="replace"), r.geturl(), r.headers.get_content_type()
+    except HTTPError as e:
+        return e.code, "", url, ""
+
+
+SL_MONTHS = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "maj": 5, "jun": 6, "jul": 7, "avg": 8, "sep": 9,
+             "okt": 10, "nov": 11, "dec": 12}
+DATE_ANY = re.compile(r"(\d{1,2})\.\s*(?:(\d{1,2})\.|(januar|februar|marec|marc|april|maj|junij|julij|avgust|"
+                      r"septemb|oktob|novemb|decemb)\w*)\s*(20\d{2})", re.I)
+
+
+def find_dates(text):
+    """Datumi v besedilu: »13.10.2026«, »13. 10. 2026«, »13. oktobra 2026«. Vrne [(položaj, date)]."""
+    out = []
+    for m in DATE_ANY.finditer(text):
+        month = int(m.group(2)) if m.group(2) else SL_MONTHS[m.group(3).lower()[:3]]
+        d = _iso(m.group(1), month, m.group(4))
+        if d:
+            out.append((m.start(), d))
+    return out
+
+
+DEADLINE_KW = re.compile(r"\brok\w*\b.{0,15}prijav|prijav\w*.{0,40}\bdo\b|zbiramo|sprejemamo|"
+                         r"trajanje (razpisa|objave)|objav\w* (velja )?do|razpis\w* (je odprt|traja|velja)|"
+                         r"veljavnost|apply (by|before)|deadline", re.I)
+
+
+def find_generic_deadline(lines):
+    """Rok samo iz vrstic, ki govorijo o prijavi; »določen čas do 31. 12. 2027« ni rok prijave."""
+    def pick(line):
+        dates = find_dates(line)
+        if not dates:
+            return None
+        for pos, d in dates:  # datum takoj za »do« (»prijave do 13.10.«), sicer zadnji (konec obdobja)
+            if re.search(r"\bdo\s*(vključno\s*)?$", line[max(0, pos - 14):pos], re.I):
+                return d
+        return dates[-1][1]
+
+    for i, line in enumerate(lines):
+        if DEADLINE_KW.search(line):
+            d = pick(line) or (pick(lines[i + 1]) if i + 1 < len(lines) and len(line) < 60 else None)
+            if d:
+                return d
+    return None
+
+
+def find_label(lines, label, limit=120):
+    """Vrednost za oznako: »Kraj dela: Maribor« ali oznaka v svoji vrstici in vrednost v naslednji."""
+    for i, line in enumerate(lines):
+        m = re.match(rf"^(?:{label})\s*:\s*(?P<value>.+)$", line, re.I)  # oznaka ima lahko svoje skupine
+        if m:
+            return m.group("value").strip()[:limit]
+        if re.match(rf"^(?:{label})\s*:?$", line, re.I) and i + 1 < len(lines):
+            return lines[i + 1].strip()[:limit]
+    return ""
+
+
+def fix_caps(title):
+    """»KOMISIONAR (m/ž) v Cash & Carry« -> »Komisionar (m/ž) v Cash & Carry«; kratke kratice (IT, SAP) ostanejo."""
+    words = title.split(" ")
+    if not any(len(w) >= 4 and w.isalpha() and w.isupper() for w in words):
+        return title
+    words = [w.lower() if len(w) >= 4 and w.isupper() else w for w in words]
+    s = " ".join(words)
+    return s[:1].upper() + s[1:]
+
+
+def split_page_title(t):
+    """»Komisionar » Mercator d.o.o.« -> [naslov, podjetje]. Pomišljaj šteje le, če ni » ali |
+    (»Razvijalec – hibridno« je navadno del naslova)."""
+    parts = [p.strip() for p in re.split(r"\s*[»|]\s*", t) if p.strip()]
+    if len(parts) == 1:
+        parts = [p.strip() for p in re.split(r"\s+[–—-]\s+", t) if p.strip()]
+    return parts
+
+
+def from_generic(markup, url="", today=None):
+    today = today or date.today()
+    out = {"title": "", "company": "", "location": "", "type": "", "salary": "",
+           "deadline": "", "dlApprox": False, "notes": "", "warnings": []}
+    ld = _ld_job_posting(markup)
+    ldv = from_json_ld(ld) if ld else {}
+    lines = html_to_lines(markup)
+    desc = ldv.get("desc_lines") or []
+    body = "\n".join(lines + desc)
+
+    def meta(prop):
+        m = re.search(rf"<meta[^>]+(?:property|name)=[\"']{prop}[\"'][^>]+content=[\"']([^\"']*)", markup, re.I)
+        return html.unescape(m.group(1)).strip() if m else ""
+
+    t = re.search(r"<title[^>]*>(.*?)</title>", markup, re.S | re.I)
+    page_title = split_page_title(" ".join(html.unescape(t.group(1)).split())) if t else []
+    out["title"] = fix_caps(ldv.get("title") or meta("og:title") or (page_title[0] if page_title else ""))
+    host = (urlparse(url).hostname or "").lower()
+    out["company"] = (ldv.get("company") or meta("og:site_name")
+                      or (page_title[-1] if len(page_title) > 1 else "") or re.sub(r"^www\.", "", host))
+    out["location"] = ldv.get("location") or find_label(
+        lines, r"kraj (opravljanja |izvajanja )?dela|kraj zaposlitve|lokacija( dela)?|delovno mesto se nahaja|"
+               r"kraj|location")
+    out["type"] = find_employment_type(body) or ldv.get("type", "")
+    out["salary"] = ldv.get("salary") or find_label(lines, r"(okvirna |osnovna |bruto |mesečna )*plača|salary", 60)
+
+    end = ldv.get("deadline_exact") or find_generic_deadline(lines + desc)
+    posted = ldv.get("posted")
+    if not posted:
+        val = find_label(lines, r"datum objave|objavljeno|objava|trajanje (razpisa|objave)")
+        dates = find_dates(val)
+        posted = dates[0][1] if dates else None
+    if end:
+        out["deadline"] = end.isoformat()
+        if end < today:
+            out["warnings"].append("Rok prijave je potekel.")
+
+    duties = find_duties(lines, fallback=False) or find_duties(desc, fallback=False)
+    req = find_requirements(lines) or find_requirements(desc)
+    notes = []
+    if posted:
+        notes.append(f"Objavljeno {fmt_sl(posted)}.")
+    if duties:
+        notes.append("Naloge: " + duties + ("" if duties.endswith("…") else "."))
+    if req:
+        notes.append("Zahteve: " + req + ("" if req.endswith("…") else "."))
+    out["notes"] = " ".join(notes)
+
+    if not (ld or end or duties or req):
+        out["warnings"].append("Na strani ni podrobnosti oglasa (morda se naložijo z JavaScriptom). "
+                               "Manjkajoče podatke dopolni z »Uredi«.")
+    elif not end:
+        out["warnings"].append("Roka prijave ni bilo mogoče prebrati.")
+    out["ok"] = bool(out["title"])
+    if not out["ok"]:
+        out["error"] = "Na strani ni bilo mogoče najti oglasa."
+    return out
+
+
+def _moved_to_listing(url, final):
+    """Oglasa ni več, če stran preusmeri na nadrejeni seznam (npr. …/prosta-delovna-mesta/)."""
+    a, b = urlparse(url).path.rstrip("/"), urlparse(final).path.rstrip("/")
+    return a != b and (b == "" or a.startswith(b + "/"))
+
+
+def get_generic(url):
+    try:
+        status, markup, final, ctype = fetch_public(url)
+    except UnsafeURL as e:
+        return {"ok": False, "error": str(e)}
+    if status in (404, 410):
+        return {"ok": False, "error": f"Oglasa ni več ({status})."}
+    if status != 200:
+        return {"ok": False, "error": f"Stran je vrnila napako {status}."}
+    if ctype and "html" not in ctype:
+        return {"ok": False, "error": "Povezava ne vodi na spletno stran (morda PDF). Oglas vnesi ročno z »Uredi«."}
+    res = from_generic(markup, final)
+    if _moved_to_listing(url, final):
+        res["warnings"].insert(0, "Oglas ni več objavljen (stran preusmeri na seznam oglasov).")
+    return res
+
+
+def is_mojedelo(url):
+    h = (urlparse(url).hostname or "").lower()
+    return h == "mojedelo.com" or h.endswith(".mojedelo.com")
+
+
 def get_ad(url):
     """Prebere oglas: najprej prek podatkovnega vmesnika portala, rezerva je HTML strani."""
+    if not (is_zrsz(url) or is_optius(url) or is_mojedelo(url)):
+        try:
+            return get_generic(url)
+        except (URLError, TimeoutError, OSError) as e:
+            return {"ok": False, "error": f"Povezava ni uspela: {e}"}
     if is_zrsz(url):
         try:
             return get_zrsz(url)
@@ -1016,9 +1242,13 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(404, {"ok": False, "error": "Baza ni vključena."})
             self._json(200, {"ok": True, "initialized": self.store.initialized(), "jobs": self.store.list_jobs()})
         elif u.path == "/api/fetch":
+            # Branje sproži zahtevo na tuj strežnik, zato ga sme zahtevati samo naša stran: lastne glave
+            # tuja stran ne more dodati brez CORS preverjanja, ki ga ne odobrimo (tudi <img src=…> je ne pošlje).
+            if self.headers.get("X-Pomocnik") != "1":
+                return self._json(403, {"ok": False, "error": "Manjka glava X-Pomocnik."})
             url = (parse_qs(u.query).get("url") or [""])[0].strip()
-            if not host_allowed(url):
-                return self._json(400, {"ok": False, "error": "Podprti so mojedelo.com, ess.gov.si (ZRSZ) in optius.com."})
+            if not is_web_url(url):
+                return self._json(400, {"ok": False, "error": "Povezava mora biti spletna stran (http ali https)."})
             try:
                 res = get_ad(url)
             except Exception as e:  # nikoli ne podri strežnika zaradi enega oglasa
@@ -1077,7 +1307,7 @@ def main(argv=None):
     url = f"http://localhost:{port}/"
     server.checker = None
     if not args.no_check:
-        server.checker = preverjanje.Checker(store, get_ad, supported=host_allowed, backup_dir=backup_dir,
+        server.checker = preverjanje.Checker(store, get_ad, supported=is_web_url, backup_dir=backup_dir,
                                              page_url=url)
         server.checker.start()
     print(f"Pomočnik teče: {url}")

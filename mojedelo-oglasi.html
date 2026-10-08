@@ -196,10 +196,13 @@ function titleFromUrl(u){
     }catch(e){return "Optius oglas"}
   }
   try{
-    const parts=new URL(u).pathname.split("/").filter(Boolean);
-    let slug=parts[parts.length-2]||parts[parts.length-1]||"Oglas";
-    slug=slug.replace(/-/g," ").trim();
-    return slug.charAt(0).toUpperCase()+slug.slice(1);
+    // zadnji del poti, ki ni samo oznaka (UUID ali številka); oznake na koncu (»-kgq21my-11629«) odreže
+    const parts=new URL(u).pathname.split("/").filter(Boolean).filter(p=>!/^[0-9a-f-]{8,}$|^\d+$/i.test(p));
+    let slug=decodeURIComponent(parts[parts.length-1]||"").replace(/\.\w{2,5}$/,"");
+    slug=slug.split(/[-_]/).filter(Boolean);
+    while(slug.length>1&&/\d/.test(slug[slug.length-1]))slug.pop();
+    slug=slug.join(" ").trim();
+    return slug?slug.charAt(0).toUpperCase()+slug.slice(1):"Oglas";
   }catch(e){return "Oglas"}
 }
 function isoDate(d){
@@ -229,7 +232,7 @@ function fillEmpty(j,src){
 // prebere oglas prek pomočnika in dopolni prazna polja (obstoječih vnosov ne povozi)
 async function enrich(j){
   try{
-    const r=await fetch("/api/fetch?url="+encodeURIComponent(j.url));
+    const r=await fetch("/api/fetch?url="+encodeURIComponent(j.url),{headers:{"X-Pomocnik":"1"}});
     const d=await r.json();
     if(!d.ok)return {ok:false,msg:d.error||"podatkov ni bilo mogoče prebrati"};
     let filled=0;
@@ -644,8 +647,8 @@ $("btnEnrichAll").addEventListener("click",async()=>{
   toast(`Dopolnjenih: ${ok}`+(fail?` · ni uspelo: ${fail}`:""));
 });
 
-const HINT_OFF="Prilepi eno ali več povezav (mojedelo.com, ZRSZ ali Optius, vsaka v svoji vrstici). Samodejno branje podatkov ni aktivno: zaženi mojedelo_pomocnik.py in odpri stran na http://localhost:8765. Do takrat podatke dopolni z »Uredi«.";
-const HINT_ON="Prilepi eno ali več povezav (vsaka v svoji vrstici). Podprti so mojedelo.com, ZRSZ (ess.gov.si) in Optius. Naslov, podjetje, kraj, rok, naloge in zahteve se preberejo samodejno.";
+const HINT_OFF="Prilepi eno ali več povezav do oglasov (vsaka v svoji vrstici). Samodejno branje podatkov ni aktivno: zaženi mojedelo_pomocnik.py in odpri stran na http://localhost:8765. Do takrat podatke dopolni z »Uredi«.";
+const HINT_ON="Prilepi eno ali več povezav (vsaka v svoji vrstici): mojedelo.com, ZRSZ, Optius ali oglas na strani podjetja. Naslov, podjetje, kraj, rok, naloge in zahteve se preberejo samodejno; pri straneh podjetij preveri podatke, ker se berejo iz besedila strani.";
 $("addHint").textContent=HINT_OFF;
 
 async function init(){

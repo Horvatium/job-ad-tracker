@@ -22,7 +22,7 @@ It replaces the "dozens of open browser tabs" workflow with one page.
 
 ## Features
 
-- **Paste links, get data**: one or more URLs at a time from [mojedelo.com](https://www.mojedelo.com), [ZRSZ](https://www.ess.gov.si) (Employment Service of Slovenia) and [Optius](https://www.optius.com).
+- **Paste links, get data**: one or more URLs at a time from [mojedelo.com](https://www.mojedelo.com), [ZRSZ](https://www.ess.gov.si) (Employment Service of Slovenia) and [Optius](https://www.optius.com), or **any company career page**: a generic reader uses structured data (`JobPosting`) when the page has it, and the page text otherwise.
 - **Deadlines first**: deadline badge with days left, warning banner for ads closing within 3 days, "closing in 7 days" filter, default sort by deadline.
 - **Works for you in the background**: once a day the helper checks whether ads you haven't applied to yet are still published, replaces estimated deadlines with exact ones, and shows a desktop notification (Windows, macOS, Linux) three days and one day before a deadline, and when an ad is taken down. Each reminder is shown only once.
 - **Your data in one file**: everything is stored in a SQLite database (`oglasi.db`) with a daily backup (last 14 days kept). On first run, ads already saved in the browser are moved into the database automatically.
@@ -106,12 +106,14 @@ Every portal adapter returns the same shape:
 | mojedelo.com | JSON API | The site is a SPA (the HTML is a 4 KB shell), so the helper calls the same API the site uses. If the API fails, it falls back to parsing the page HTML/text. |
 | ZRSZ | JSON API | Data comes in UPPERCASE; titles and company names are normalised (`NATAKAR - M/Ž` → `Natakar (m/ž)`, trailing seat of the company removed). |
 | Optius | HTML + JSON-LD `JobPosting` | JSON-LD contains raw newlines inside strings, so it is parsed with `json.loads(strict=False)`; duties and requirements come from the page sections. |
+| Any other page (company careers) | JSON-LD `JobPosting`, else page text | Most career sites publish `JobPosting` for Google for Jobs. Without it, the reader takes the title and company from `<title>` (`Komisionar » Mercator d.o.o.`), labelled values (`Kraj opravljanja dela: …`), and the deadline only from lines about applying (`Prijave pričakujemo do 13.10.2026`), so "fixed-term until 31. 12. 2027" is not mistaken for a deadline. Slovenian month names are understood. A 404 or a redirect to the parent listing means the ad was taken down. |
 
 ### Design decisions
 
 - **API instead of scraping a SPA.** The mojedelo page renders client-side; the API is faster, more stable and returns structured data (exact deadline, employment type, probation period).
 - **Deadlines in local time.** mojedelo returns `endDate` in UTC; a deadline of `2026-10-11T21:59:59Z` is 11 October in Slovenia, not 12 October. Conversion uses the EU DST rule (last Sunday of March/October) with no dependency on `zoneinfo`/`tzdata`, which is missing on many Windows installs.
-- **A local server is still an attack surface.** Any website you visit can send requests to `localhost`. The helper binds to `127.0.0.1`, rejects requests whose `Host` header is not `localhost` (DNS rebinding), only reads the three portal domains (not an open proxy), and accepts writes only as `application/json` from a local `Origin`, which a foreign page cannot send without a CORS preflight that the helper never approves (CSRF).
+- **A local server is still an attack surface.** Any website you visit can send requests to `localhost`. The helper binds to `127.0.0.1` and rejects requests whose `Host` header is not `localhost` (DNS rebinding). Writes are accepted only as `application/json` from a local `Origin`, and reading an ad requires a custom `X-Pomocnik` header; a foreign page cannot send either without a CORS preflight that the helper never approves (CSRF).
+- **Reading any page without becoming a proxy into your network.** Since company pages can be on any domain, the helper resolves every URL and refuses addresses that are not public (loopback, private ranges, link-local such as `169.254.169.254`), and checks every redirect the same way (SSRF).
 - **Page and background check never overwrite each other.** The page only sends ads that changed since the last save. Fields set by the helper (`statusAt`, `checkedAt`, `checkState`) cannot be written by the page, and the check only replaces a missing or estimated deadline, never one entered by hand.
 - **Nothing is lost when the helper is down.** Unsaved changes are kept in the browser and sent on the next start.
 - **User data wins.** Automatically generated notes are tracked separately (`autoNotes`); once you edit a note, re-reading the ad will not touch it.
@@ -134,6 +136,7 @@ Tests run on GitHub Actions on every push.
 
 ## Limitations
 
+- Company pages are read from their text, so check the result; pages that load the ad with JavaScript only give a title, and the rest is filled in with "Edit".
 - Parsers depend on third-party APIs and page structure, which can change without notice. The helper re-reads public API configuration on authentication errors, but there is no guarantee.
 - Reminders need the helper to be running (see the autostart tip above). The `.ics` export works without it.
 - Data is on one computer; there is no sync between devices.
@@ -141,7 +144,7 @@ Tests run on GitHub Actions on every push.
 
 ## Roadmap
 
-- One parser module per portal behind a common interface; a generic JSON-LD `JobPosting` parser for company career pages
+- One parser module per portal behind a common interface
 - Saved searches: get notified only about new ads matching e.g. "IT, Pomurje"
 - Application log: contact person, next step, conversation notes
 
@@ -151,4 +154,4 @@ Tests run on GitHub Actions on every push.
 
 ## Disclaimer
 
-This is a personal tool. It reads publicly available job ads one at a time: when the user adds or refreshes an ad, and once a day for ads on the user's own list that are not yet applied to (with a pause of a few seconds between requests). It does not crawl, bulk-download or republish portal content. It uses the same public endpoints the portals' own websites use, which are undocumented and not an official API. Check each portal's terms of use before using it, and do not use it for bulk data collection. Not affiliated with mojedelo.com, ZRSZ or Optius.
+This is a personal tool. It reads publicly available job ads one at a time: when the user adds or refreshes an ad, and once a day for ads on the user's own list that are not yet applied to (with a pause of a few seconds between requests). It does not crawl, bulk-download or republish portal content. It uses the same public endpoints the portals' own websites use, which are undocumented and not an official API. Check each portal's terms of use before using it, and do not use it for bulk data collection. Not affiliated with mojedelo.com, ZRSZ, Optius or any employer whose pages it reads.

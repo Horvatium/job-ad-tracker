@@ -154,7 +154,8 @@ def test_batch_rejects_foreign_origin(server):
 def test_batch_rejects_empty_or_huge_body(server):
     h = {"Content-Type": "application/json"}
     assert request(server, "POST", "/api/jobs/batch", "", headers=h)[0] == 413
-    assert request(server, "POST", "/api/jobs/batch", "x", headers=dict(h, **{"Content-Length": str(10**9)}))[0] == 413
+    # samo glave: strežnik odgovori takoj in telesa ne bere (sicer bi Windows lahko prekinil pošiljanje)
+    assert request(server, "POST", "/api/jobs/batch", None, headers=dict(h, **{"Content-Length": str(10**9)}))[0] == 413
 
 
 def test_batch_bad_json(server):
@@ -175,11 +176,26 @@ def test_rejects_foreign_host_header(server):
     assert get(server, "/api/ping", host="evil.example")[0] == 403
 
 
-def test_fetch_rejects_other_hosts(server):
-    status, body = get(server, "/api/fetch?url=https%3A%2F%2Fevil.example%2F")
+FETCH_HEADERS = {"X-Pomocnik": "1"}
+
+
+def test_fetch_rejects_non_web_urls(server):
+    status, body = request(server, "GET", "/api/fetch?url=file%3A%2F%2F%2FC%3A%2FWindows%2Fwin.ini", headers=FETCH_HEADERS)
     assert status == 400 and not json.loads(body)["ok"]
 
 
+def test_fetch_requires_own_header(server):
+    # tuja stran lahko sproži GET (npr. <img src="http://localhost:8765/api/fetch?url=…">), glave pa ne doda
+    assert get(server, "/api/fetch?url=https%3A%2F%2Fwww.mojedelo.com%2Foglas%2Fx%2F1")[0] == 403
+
+
 def test_fetch_ok(server):
-    status, body = get(server, "/api/fetch?url=https%3A%2F%2Fwww.mojedelo.com%2Foglas%2Fx%2F1")
+    status, body = request(server, "GET", "/api/fetch?url=https%3A%2F%2Fwww.mojedelo.com%2Foglas%2Fx%2F1",
+                           headers=FETCH_HEADERS)
     assert status == 200 and json.loads(body)["title"] == "Testni oglas"
+
+
+def test_fetch_any_public_site(server):
+    status, body = request(server, "GET", "/api/fetch?url=https%3A%2F%2Fwww.mercatorgroup.si%2Fsl%2Fkariera%2Fx%2F",
+                           headers=FETCH_HEADERS)
+    assert status == 200 and json.loads(body)["ok"]
