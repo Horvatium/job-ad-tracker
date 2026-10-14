@@ -20,7 +20,7 @@ h1{font-size:22px;margin:0 0 4px}
 .sub{color:var(--muted);margin:0 0 16px;font-size:13px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 input,select,textarea,button{font:inherit;color:inherit}
-input[type=text],input[type=date],input[type=search],select,textarea{
+input[type=text],input[type=date],input[type=time],input[type=search],select,textarea{
   background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
 textarea{width:100%;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
@@ -38,7 +38,9 @@ button.small{padding:4px 9px;font-size:13px}
 .chip{border-radius:999px;padding:4px 12px;font-size:13px;background:var(--card);border:1px solid var(--line);cursor:pointer}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px}
-.card.rejected{opacity:.55}
+.card.closed{opacity:.55}
+.meta .iv{color:var(--accent);font-weight:600;cursor:pointer}
+.meta .iv.soon{color:var(--warn)}
 .star{background:none;border:none;font-size:20px;line-height:1;padding:2px;color:var(--muted)}
 .star.on{color:#e0a800}
 .title{font-weight:600;font-size:16px;color:var(--text);text-decoration:none;word-break:break-word}
@@ -52,6 +54,7 @@ button.small{padding:4px 9px;font-size:13px}
 .dlbox.soon{background:var(--warn-soft);color:var(--warn)}
 .dlbox.over{background:var(--danger-soft);color:var(--danger)}
 .meta .gone{color:var(--danger);font-weight:600}
+.dlbox.done{background:transparent;color:var(--muted);border:1px solid var(--line)}
 .dlbox.none{background:transparent;color:var(--muted);border:1px dashed var(--line);font-size:12px}
 .actions{grid-column:2/4;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
 .actions select{padding:4px 8px;font-size:13px}
@@ -97,7 +100,7 @@ dialog h2{margin:0 0 12px;font-size:18px}
     <button id="btnExport">Izvoz JSON</button>
     <button id="btnCsv">Izvoz CSV (Excel)</button>
     <button id="btnImport">Uvoz JSON</button>
-    <button id="btnIcs" title="Roki aktivnih oglasov kot dogodki z opomniki 3 dni in 1 dan prej">Izvoz v koledar (.ics)</button>
+    <button id="btnIcs" title="Roki aktivnih oglasov (opomnik 3 dni in 1 dan prej) in razgovori (opomnik dan prej in 1 uro prej)">Izvoz v koledar (.ics)</button>
     <button id="btnEnrichAll" hidden>Dopolni manjkajoče podatke</button>
     <button id="btnCheck" hidden title="Pomočnik to naredi sam enkrat na dan">Preveri, ali so oglasi še objavljeni</button>
     <input type="file" id="fileImport" accept=".json,application/json" hidden>
@@ -122,10 +125,23 @@ dialog h2{margin:0 0 12px;font-size:18px}
     <label>Rok prijave<input type="date" id="eDeadline"></label>
     <label>Plača / ocena<input type="text" id="eSalary"></label>
     <label>Status<select id="eStatus"></select></label>
+    <label>Razgovor – datum<input type="date" id="eIvDate"></label>
+    <label>Razgovor – ura<input type="time" id="eIvTime"></label>
     <label class="full">Povezava<input type="text" id="eUrl"></label>
     <label class="full">Opombe<textarea id="eNotes" rows="4"></textarea></label>
     <div class="dfoot full"><button type="button" id="editCancel">Prekliči</button><button type="submit" class="primary" id="editOk">Shrani</button></div>
   </form>
+</dialog>
+
+<dialog id="dlgInterview">
+  <h2>Kdaj bo razgovor?</h2>
+  <p class="sub" id="ivJob"></p>
+  <div class="f">
+    <label>Datum<input type="date" id="ivDate"></label>
+    <label>Ura (neobvezno)<input type="time" id="ivTime"></label>
+  </div>
+  <p class="sub" style="margin-top:10px" id="ivHint"></p>
+  <div class="dfoot"><button id="ivLater">Kasneje</button><button class="primary" id="ivSave">Shrani</button></div>
 </dialog>
 
 <dialog id="dlgImport">
@@ -142,13 +158,19 @@ const STATUSES=[
   {id:"new",label:"Za pregled"},
   {id:"interesting",label:"Zanimivo"},
   {id:"applied",label:"Prijavljeno"},
-  {id:"waiting",label:"Čakam odgovor"},
-  {id:"rejected",label:"Ni zame"}
+  {id:"interview",label:"Razgovor"},
+  {id:"skipped",label:"Ni zame"},
+  {id:"turned_down",label:"Zavrnjen"}
 ];
+// statusi iz prejšnjih različic (shranjeni v brskalniku ali v starih izvozih JSON)
+const LEGACY_STATUS={waiting:"applied",rejected:"skipped"};
+function normStatus(s){s=LEGACY_STATUS[s]||s;return STATUSES.some(x=>x.id===s)?s:"new"}
+function isClosed(j){return j.status==="skipped"||j.status==="turned_down"}
 const STORE="mojedelo_oglasi_v1";
 
 // Primeri ob prvem zagonu (izmišljena podjetja). Rok je zamik v dneh od danes, da primeri nikoli ne zastarajo.
-// [pot, naslov, podjetje, kraj, vrsta zaposlitve, rok (dni od danes ali null), rok je ocenjen, plača, status, zvezdica, opombe]
+// [pot, naslov, podjetje, kraj, vrsta zaposlitve, rok (dni od danes ali null), rok je ocenjen, plača, status, zvezdica, opombe,
+//  razgovor ([dni od danes, ura], neobvezno)]
 const SEED=[
  ["junior-razvijalec-spletnih-aplikacij","Junior razvijalec spletnih aplikacij (m/ž)","Kvadrat Soft d.o.o.","Murska Sobota (hibridno)","nedoločen čas, polni delovni čas, poskusna doba 6 mes.",2,false,"1.900–2.400 EUR bruto","interesting",true,
   "Izkušnje: 0 do 1 leto. Naloge: razvoj spletnih aplikacij v JavaScriptu in Pythonu; vzdrževanje REST API-jev; sodelovanje z oblikovalci in testerji. Zahteve: VI. stopnja računalništva ali ustrezne izkušnje; osnove SQL in Git; dobra angleščina."],
@@ -158,13 +180,13 @@ const SEED=[
   "Naloge: skrbništvo strežnikov Windows in Linux; uporabniška podpora; varnostne kopije. Zahteve: V. stopnja tehnične smeri; poznavanje omrežij; vozniški izpit B."],
  ["podatkovni-analitik","Podatkovni analitik (m/ž)","Breza Analitika d.o.o.","Maribor (delo od doma)","nedoločen čas, polni delovni čas",9,false,"2.400 EUR bruto","interesting",true,
   "Izkušnje: 1 do 3 leta. Naloge: priprava poročil in nadzornih plošč; čiščenje in povezovanje podatkov. Zahteve: SQL; Python ali R; Power BI je prednost."],
- ["prodajalec-v-trgovini","Prodajalec v trgovini (m/ž)","Vrtnica Trgovina d.o.o.","Gornja Radgona","krajši delovni čas",14,false,"","new",false,
-  "Naloge: svetovanje kupcem; delo na blagajni; urejanje polic. Zahteve: IV. stopnja izobrazbe; komunikativnost."],
+ ["prodajalec-v-trgovini","Prodajalec v trgovini (m/ž)","Vrtnica Trgovina d.o.o.","Gornja Radgona","krajši delovni čas",14,false,"","interview",false,
+  "Naloge: svetovanje kupcem; delo na blagajni; urejanje polic. Zahteve: IV. stopnja izobrazbe; komunikativnost.",[2,"10:00"]],
  ["serviser-hladilne-tehnike","Serviser hladilne tehnike (m/ž)","Gorički Servis d.o.o.","Beltinci","nedoločen čas, terensko delo",21,false,"","applied",false,
   "Naloge: montaža in servis hladilnih naprav na terenu. Zahteve: IV. ali V. stopnja elektro ali strojne smeri; vozniški izpit B.\nPrijava poslana po e-pošti, odgovor obljubljen v 14 dneh."],
  ["receptor","Receptor (m/ž)","Sončnica Hotel d.o.o.","Moravske Toplice","sezonsko delo, izmensko",null,false,"","new",false,
   "Naloge: sprejem gostov; rezervacije; obračun storitev. Zahteve: aktivno znanje angleščine in nemščine."],
- ["tehnicni-pisec","Tehnični pisec (m/ž)","Kvadrat Soft d.o.o.","Ljubljana","določen čas 12 mesecev",-3,false,"","rejected",false,
+ ["tehnicni-pisec","Tehnični pisec (m/ž)","Kvadrat Soft d.o.o.","Ljubljana","določen čas 12 mesecev",-3,false,"","turned_down",false,
   "Naloge: priprava uporabniških navodil in dokumentacije API. Zahteve: odlična angleščina; VII. stopnja izobrazbe."]
 ];
 
@@ -213,7 +235,8 @@ function isoInDays(n){const d=new Date();d.setDate(d.getDate()+n);return isoDate
 function seed(){
   const now=Date.now();
   return SEED.map((r,i)=>({id:uid(),url:"https://example.com/oglas/"+r[0],title:r[1],company:r[2],location:r[3],type:r[4],
-    deadline:r[5]===null?"":isoInDays(r[5]),dlApprox:r[6],salary:r[7],status:r[8],star:r[9],notes:r[10],demo:true,added:now-i}));
+    deadline:r[5]===null?"":isoInDays(r[5]),dlApprox:r[6],salary:r[7],status:r[8],star:r[9],notes:r[10],
+    interview:r[11]?`${isoInDays(r[11][0])}T${r[11][1]}`:"",demo:true,added:now-i}));
 }
 function removeDemo(){
   const n=jobs.length;jobs=jobs.filter(j=>!j.demo);save();render();
@@ -264,6 +287,7 @@ function load(){
   const stored=readLocal();
   if(!stored){jobs=seed();save();return}
   jobs=stored;
+  jobs.forEach(j=>{j.status=normStatus(j.status)});
 }
 function save(){
   if(MODE==="local"){try{localStorage.setItem(STORE,JSON.stringify(jobs))}catch(e){}return}
@@ -352,6 +376,12 @@ function daysLeft(d){
 }
 function fmtDate(d){if(!d)return"";const [y,m,dd]=d.split("-");return `${+dd}. ${+m}. ${y}`}
 function dlText(dl){return dl<0?"potekel":dl===0?"danes":dl===1?"jutri":`še ${dl} dni`}
+// razgovor: »2026-10-16« ali »2026-10-16T10:00« -> »razgovor 16. 10. 2026 ob 10:00 (jutri)«
+function fmtInterview(iv){
+  const d=daysLeft(iv.slice(0,10));
+  const rel=d<0?"že mimo":d===0?"danes":d===1?"jutri":`čez ${d} dni`;
+  return `razgovor ${fmtDate(iv.slice(0,10))}${iv.length>10?" ob "+iv.slice(11,16):""} (${rel})`;
+}
 function isActive(j){return j.status==="new"||j.status==="interesting"}
 function isGone(j){return j.checkState==="gone"} // pomočnik je ugotovil, da oglas ni več objavljen
 function isSoon(j){const d=daysLeft(j.deadline);return isActive(j)&&!isGone(j)&&d!==null&&d>=0&&d<=7}
@@ -363,16 +393,22 @@ function renderBanner(){
   const urgent=act.filter(x=>x.d>=0&&x.d<=3).sort((a,b)=>a.d-b.d);
   const expired=act.filter(x=>x.d<0).length;
   const gone=jobs.filter(j=>isActive(j)&&isGone(j)).length;
-  if(!urgent.length&&!expired&&!gone){$("banner").innerHTML="";return}
+  const ivs=jobs.filter(j=>j.status==="interview"&&j.interview).map(j=>({j,d:daysLeft(j.interview.slice(0,10))}))
+    .filter(x=>x.d>=0&&x.d<=3).sort((a,b)=>a.j.interview.localeCompare(b.j.interview));
+  if(!urgent.length&&!expired&&!gone&&!ivs.length){$("banner").innerHTML="";return}
   let html="";
+  if(ivs.length){
+    html+=`<b>🤝 Razgovori v 3 dneh</b><ul style="margin-bottom:6px">`+
+      ivs.map(x=>`<li>${esc(x.j.title)}${x.j.company?` (${esc(x.j.company)})`:""} – ${esc(fmtInterview(x.j.interview).replace(/^razgovor /,""))}</li>`).join("")+`</ul>`;
+  }
   if(urgent.length){
     html+=`<b>⏰ Rok prijave v 3 dneh: ${urgent.length} ${oglasov(urgent.length)}</b><ul>`+
       urgent.slice(0,6).map(x=>`<li>${esc(x.j.title)}${x.j.company?` (${esc(x.j.company)})`:""} – ${dlText(x.d)}</li>`).join("")+
       (urgent.length>6?`<li>… in še ${urgent.length-6}</li>`:"")+`</ul>`;
   }
-  if(expired)html+=`<div${urgent.length?' style="margin-top:6px"':""}>Potekli oglasi, ki še niso prijavljeni ali zavrnjeni: ${expired}</div>`;
+  if(expired)html+=`<div${urgent.length?' style="margin-top:6px"':""}>Oglasi za pregled, ki jim je rok prijave že potekel: ${expired}</div>`;
   if(gone)html+=`<div${urgent.length||expired?' style="margin-top:6px"':""}>⚠ Oglasi za pregled, ki niso več objavljeni: ${gone}</div>`;
-  const target=urgent.length?"soon":gone?"gone":"soon";
+  const target=urgent.length?"soon":ivs.length?"interview":gone?"gone":"soon";
   $("banner").innerHTML=`<div class="banner" id="bannerBox" data-f="${target}" title="Klikni za prikaz teh oglasov">${html}</div>`;
 }
 
@@ -415,16 +451,23 @@ function render(){
     if(dl===null){
       dlHtml=`<div class="dlbox none">rok ni vnesen</div>`;
     }else{
-      const cls=dl<0?"over":dl<=3?"soon":"";
+      // po prijavi rok ni več pomemben: brez rdeče in rumene barve
+      const cls=!isActive(j)?"done":dl<0?"over":dl<=3?"soon":"";
       const checked=j.checkedAt?` · oglas preverjen ${fmtDate(isoDate(j.checkedAt))}`:"";
-      dlHtml=`<div class="dlbox ${cls}" title="${j.dlApprox?"Približen rok, ocenjen iz podatka »še X dni« na portalu":"Rok prijave"}${esc(checked)}"><div class="d1">${j.dlApprox?"~":""}${esc(fmtDate(j.deadline))}</div><div class="d2">${dlText(dl)}</div></div>`;
+      dlHtml=`<div class="dlbox ${cls}" title="${j.dlApprox?"Približen rok, ocenjen iz podatka »še X dni« na portalu":"Rok prijave"}${esc(checked)}"><div class="d1">${j.dlApprox?"~":""}${esc(fmtDate(j.deadline))}</div><div class="d2">${isActive(j)?dlText(dl):"rok prijave"}</div></div>`;
     }
-    const since=(j.status==="applied"||j.status==="waiting")&&j.statusAt
-      ?`<span>📨 ${j.status==="applied"?"prijavljeno":"čakam od"} ${esc(fmtDate(isoDate(j.statusAt)))}</span>`:"";
+    let since="";
+    if(j.status==="applied"&&j.statusAt)since=`<span>📨 prijavljeno ${esc(fmtDate(isoDate(j.statusAt)))}</span>`;
+    if(j.status==="interview"){
+      const d=daysLeft((j.interview||"").slice(0,10));
+      since=j.interview
+        ?`<span class="iv ${d!==null&&d>=0&&d<=1?"soon":""}" data-a="interview" title="Klikni za spremembo">🤝 ${esc(fmtInterview(j.interview))}</span>`
+        :`<span class="iv" data-a="interview">🤝 razgovor: vnesi datum</span>`;
+    }
     const gone=isGone(j)?`<span class="gone" title="${esc(j.checkMsg||"")}">⚠ oglas ni več objavljen (preverjeno ${esc(fmtDate(isoDate(j.checkedAt)))})</span>`:"";
     const meta=[gone,j.company&&`<span>🏢 ${esc(j.company)}</span>`,j.location&&`<span>📍 ${esc(j.location)}</span>`,j.type&&`<span>📄 ${esc(j.type)}</span>`,j.salary&&`<span>💶 ${esc(j.salary)}</span>`,since].filter(Boolean).join("");
     const opts=STATUSES.map(s=>`<option value="${s.id}" ${s.id===j.status?"selected":""}>${esc(s.label)}</option>`).join("");
-    return `<div class="card ${j.status==="rejected"?"rejected":""}" data-id="${j.id}">
+    return `<div class="card ${isClosed(j)?"closed":""}" data-id="${j.id}">
       <button class="star ${j.star?"on":""}" data-a="star" title="Zvezdica">${j.star?"★":"☆"}</button>
       <div>
         <a class="title" href="${esc(j.url)}" target="_blank" rel="noopener noreferrer">${esc(j.title)}</a>
@@ -468,6 +511,7 @@ $("list").addEventListener("click",e=>{
   if(a==="star"){j.star=!j.star;save();render()}
   else if(a==="open"){window.open(j.url,"_blank","noopener")}
   else if(a==="edit"){openEdit(j)}
+  else if(a==="interview"){openInterview(j)}
   else if(a==="enrich"){
     const btn=e.target.closest("[data-a]");btn.disabled=true;btn.textContent="Berem …";
     enrich(j).then(r=>{render();toast(r.ok?(r.filled?`Dopolnjeno: ${r.filled} polj`:"Ni novih podatkov za dopolniti")+(r.warn?` · ${r.warn}`:""):`Ni uspelo: ${r.msg}`)});
@@ -480,7 +524,32 @@ $("list").addEventListener("click",e=>{
 $("list").addEventListener("change",e=>{
   if(e.target.dataset.a!=="status")return;
   const j=jobs.find(x=>x.id===e.target.closest(".card").dataset.id);
-  if(j){j.status=e.target.value;save();render()}
+  if(!j)return;
+  j.status=e.target.value;save();render();
+  if(j.status==="interview")openInterview(j);
+});
+
+// razgovor: datum in neobvezna ura
+let ivJob=null;
+function openInterview(j){
+  ivJob=j;
+  $("ivJob").textContent=j.title+(j.company?` (${j.company})`:"");
+  $("ivDate").value=(j.interview||"").slice(0,10);
+  $("ivTime").value=(j.interview||"").slice(11,16);
+  $("ivHint").textContent=MODE==="server"
+    ?"Pomočnik te opomni dan prej in na dan razgovora. Razgovor je tudi v izvozu v koledar (.ics)."
+    :"Razgovor je v izvozu v koledar (.ics). Opomnike pošilja pomočnik, ko teče.";
+  $("dlgInterview").showModal();$("ivDate").focus();
+}
+$("ivLater").addEventListener("click",()=>{ivJob=null;$("dlgInterview").close()});
+$("ivSave").addEventListener("click",()=>{
+  if(ivJob){
+    const d=$("ivDate").value,t=$("ivTime").value;
+    ivJob.interview=d?(t?`${d}T${t}`:d):"";
+    if(d)ivJob.status="interview";
+    save();render();
+  }
+  ivJob=null;$("dlgInterview").close();
 });
 $("toastUndo").addEventListener("click",()=>{
   if(!lastDeleted)return;
@@ -526,6 +595,7 @@ function openEdit(j){
   $("eTitle").value=j.title;$("eCompany").value=j.company;$("eLocation").value=j.location;
   $("eType").value=j.type;$("eDeadline").value=j.deadline;$("eSalary").value=j.salary;
   $("eStatus").value=j.status;$("eUrl").value=j.url;$("eNotes").value=j.notes;
+  $("eIvDate").value=(j.interview||"").slice(0,10);$("eIvTime").value=(j.interview||"").slice(11,16);
   $("dlgEdit").showModal();
 }
 $("editCancel").addEventListener("click",()=>$("dlgEdit").close());
@@ -538,6 +608,8 @@ $("editForm").addEventListener("submit",()=>{
   editing.deadline=$("eDeadline").value;
   editing.salary=$("eSalary").value.trim();editing.status=$("eStatus").value;
   editing.url=normUrl($("eUrl").value)||editing.url;editing.notes=$("eNotes").value;
+  const ivd=$("eIvDate").value,ivt=$("eIvTime").value;
+  editing.interview=ivd?(ivt?`${ivd}T${ivt}`:ivd):"";
   save();render();
 });
 
@@ -550,10 +622,11 @@ function download(name,text,type){
 const stamp=()=>new Date().toISOString().slice(0,10);
 $("btnExport").addEventListener("click",()=>download(`oglasi-${stamp()}.json`,JSON.stringify(jobs,null,2),"application/json"));
 $("btnCsv").addEventListener("click",()=>{
-  const head=["Naslov","Podjetje","Kraj","Vrsta zaposlitve","Rok prijave","Rok je ocenjen","Plača","Status","Zvezdica","Opombe","Povezava"];
+  const head=["Naslov","Podjetje","Kraj","Vrsta zaposlitve","Rok prijave","Rok je ocenjen","Plača","Status","Razgovor","Zvezdica","Opombe","Povezava"];
   const sl=Object.fromEntries(STATUSES.map(s=>[s.id,s.label]));
   const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
-  const rows=jobs.map(j=>[j.title,j.company,j.location,j.type,j.deadline,j.dlApprox?"da":"",j.salary,sl[j.status]||j.status,j.star?"da":"",j.notes,j.url].map(q).join(";"));
+  const rows=jobs.map(j=>[j.title,j.company,j.location,j.type,j.deadline,j.dlApprox?"da":"",j.salary,sl[j.status]||j.status,
+    (j.interview||"").replace("T"," "),j.star?"da":"",j.notes,j.url].map(q).join(";"));
   download(`oglasi-${stamp()}.csv`,"﻿"+[head.map(q).join(";"),...rows].join("\r\n"),"text/csv;charset=utf-8");
 });
 $("btnImport").addEventListener("click",()=>$("fileImport").click());
@@ -565,7 +638,7 @@ function applyImport(data,replace){
     if(!j||!j.url)return;const url=normUrl(j.url);
     const ex=byUrl.get(url);
     if(ex){if(fillEmpty(ex,j))u++;return}
-    const nj={id:uid(),url,title:j.title||titleFromUrl(url),company:j.company||"",location:j.location||"",type:j.type||"",deadline:j.deadline||"",dlApprox:!!j.dlApprox,salary:j.salary||"",status:STATUSES.some(s=>s.id===j.status)?j.status:"new",star:!!j.star,notes:j.notes||"",added:j.added||Date.now()};
+    const nj={id:uid(),url,title:j.title||titleFromUrl(url),company:j.company||"",location:j.location||"",type:j.type||"",deadline:j.deadline||"",dlApprox:!!j.dlApprox,salary:j.salary||"",status:normStatus(j.status),interview:typeof j.interview==="string"?j.interview:"",star:!!j.star,notes:j.notes||"",added:j.added||Date.now()};
     if(typeof j.autoNotes==="string")nj.autoNotes=j.autoNotes;
     jobs.push(nj);byUrl.set(url,nj);n++;
   });
@@ -611,9 +684,31 @@ function icsFold(line){
   }
   return out;
 }
-function buildIcs(list){
+function icsLocal(d){ // lokalni čas brez časovnega pasu (»plavajoči«), kot ga vnese uporabnik
+  const p=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}T${p(d.getHours())}${p(d.getMinutes())}00`;
+}
+function buildIcs(list,interviews=[]){
   const stampDt=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
   const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Horvatium//job-ad-tracker//SL","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Roki prijav"];
+  const alarm=(trig,text)=>L.push("BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${icsEsc(text)}`,`TRIGGER:${trig}`,"END:VALARM");
+  interviews.forEach(j=>{
+    const what=j.title+(j.company?` – ${j.company}`:"");
+    const day=j.interview.slice(0,10),timed=j.interview.length>10;
+    L.push("BEGIN:VEVENT",`UID:${j.id}-razgovor@job-ad-tracker`,`DTSTAMP:${stampDt}`);
+    if(timed){
+      const s=new Date(j.interview+":00"),e=new Date(s.getTime()+60*60*1000);  // privzeto 1 ura
+      L.push(`DTSTART:${icsLocal(s)}`,`DTEND:${icsLocal(e)}`);
+    }else{
+      L.push(`DTSTART;VALUE=DATE:${day.replace(/-/g,"")}`,`DTEND;VALUE=DATE:${isoInDays(daysLeft(day)+1).replace(/-/g,"")}`);
+    }
+    L.push(`SUMMARY:${icsEsc("Razgovor: "+what)}`,`DESCRIPTION:${icsEsc([j.location,j.url,j.notes].filter(Boolean).join("\n\n"))}`,
+      `URL:${j.url}`);
+    if(j.location)L.push(`LOCATION:${icsEsc(j.location)}`);
+    if(timed){alarm("-P1D",`Jutri razgovor: ${what}`);alarm("-PT1H",`Čez 1 uro razgovor: ${what}`)}
+    else alarm("-PT15H",`Jutri razgovor: ${what}`);
+    L.push("END:VEVENT");
+  });
   list.forEach(j=>{
     const start=j.deadline.replace(/-/g,""),end=isoInDays(daysLeft(j.deadline)+1).replace(/-/g,"");
     const what=j.title+(j.company?` – ${j.company}`:"");
@@ -629,9 +724,10 @@ function buildIcs(list){
 }
 $("btnIcs").addEventListener("click",()=>{
   const list=jobs.filter(j=>!j.demo&&isActive(j)&&j.deadline&&daysLeft(j.deadline)>=0);
-  if(!list.length){toast("Ni oglasov za pregled ali zanimivih z rokom, ki še ni potekel");return}
-  download(`roki-prijav-${stamp()}.ics`,buildIcs(list),"text/calendar;charset=utf-8");
-  toast(`V koledar izvoženih rokov: ${list.length}`);
+  const ivs=jobs.filter(j=>!j.demo&&j.status==="interview"&&j.interview&&daysLeft(j.interview.slice(0,10))>=0);
+  if(!list.length&&!ivs.length){toast("Ni prihodnjih rokov prijave ali razgovorov za izvoz");return}
+  download(`roki-prijav-${stamp()}.ics`,buildIcs(list,ivs),"text/calendar;charset=utf-8");
+  toast(`V koledar izvoženih rokov: ${list.length}`+(ivs.length?` · razgovorov: ${ivs.length}`:""));
 });
 
 $("btnEnrichAll").addEventListener("click",async()=>{

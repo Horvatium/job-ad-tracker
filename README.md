@@ -26,8 +26,9 @@ It replaces the "dozens of open browser tabs" workflow with one page.
 - **Deadlines first**: deadline badge with days left, warning banner for ads closing within 3 days, "closing in 7 days" filter, default sort by deadline.
 - **Works for you in the background**: once a day the helper checks whether ads you haven't applied to yet are still published, replaces estimated deadlines with exact ones, and shows a desktop notification (Windows, macOS, Linux) three days and one day before a deadline, and when an ad is taken down. Each reminder is shown only once.
 - **Your data in one file**: everything is stored in a SQLite database (`oglasi.db`) with a daily backup (last 14 days kept). On first run, ads already saved in the browser are moved into the database automatically.
-- Status workflow (to review → interesting → applied → waiting → not for me) with the date of each change, favourites, notes, search and filters, manual editing of every field.
-- **Calendar export**: deadlines of open ads as an `.ics` file (Google Calendar, Outlook, Apple Calendar) with reminders at 9:00 three days and one day before. Events have stable UIDs, so re-importing updates them instead of creating duplicates (in apps that support it).
+- Status workflow (to review → interesting → applied → interview → not for me / turned down) with the date of each change, favourites, notes, search and filters, manual editing of every field.
+- **Interviews**: choosing "Interview" asks for the date and time; the card and the top banner show it ("tomorrow at 10:00"), the helper sends a reminder the day before and on the day, and it is included in the calendar export (with a reminder an hour before).
+- **Calendar export**: deadlines of open ads and upcoming interviews as an `.ics` file (Google Calendar, Outlook, Apple Calendar) with reminders at 9:00 three days and one day before. Events have stable UIDs, so re-importing updates them instead of creating duplicates (in apps that support it).
 - Re-reading never overwrites your own notes or manually entered deadlines; estimated deadlines (`~`) are replaced by exact ones when they become available.
 - JSON export/import (replace or merge) and CSV export for Excel (Slovenian locale: `;` separator, UTF-8 BOM).
 - First run shows a few example ads (fictional companies, deadlines relative to today) that can be removed with one click.

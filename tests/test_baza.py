@@ -100,6 +100,40 @@ def test_jobs_for_check(store):
     assert [j["id"] for j in store.jobs_for_check("2026-10-07")] == ["a", "e"]
 
 
+@pytest.mark.parametrize("old, new", [("waiting", "applied"), ("rejected", "skipped"), ("interview", "interview")])
+def test_legacy_status_from_page(old, new):
+    assert baza.clean_job(job(status=old))["status"] == new
+
+
+@pytest.mark.parametrize("raw, clean", [("2026-10-16T10:00", "2026-10-16T10:00"), ("2026-10-16", "2026-10-16"),
+                                        ("16. 10. 2026", ""), ("2026-10-16T10:00:00Z", ""), (None, "")])
+def test_interview_value(raw, clean):
+    assert baza.clean_job(job(interview=raw))["interview"] == clean
+
+
+# baza prve različice (brez stolpca interview, statusa »waiting« in »rejected«)
+SCHEMA_V1 = baza.SCHEMA.replace("    interview   TEXT NOT NULL DEFAULT '',     -- razgovor: YYYY-MM-DD ali YYYY-MM-DDTHH:MM\n", "")
+
+
+def test_migration_from_v1(tmp_path):
+    p = str(tmp_path / "oglasi.db")
+    db = sqlite3.connect(p)
+    db.executescript(SCHEMA_V1)
+    db.executemany("INSERT INTO jobs (id, url, status) VALUES (?, ?, ?)",
+                   [("a", "https://x/a", "waiting"), ("b", "https://x/b", "rejected"), ("c", "https://x/c", "new")])
+    db.execute("INSERT INTO status_history (job_id, status, at) VALUES ('a', 'waiting', 1)")
+    db.execute("PRAGMA user_version = 1")
+    db.commit()
+    db.close()
+    s = baza.Store(p)
+    assert {j["id"]: j["status"] for j in s.list_jobs()} == {"a": "applied", "b": "skipped", "c": "new"}
+    assert s.get_job("a")["interview"] == "" and s.history("a") == [("applied", 1)]
+    s.apply_batch([job("a", url="https://x/a", status="interview", interview="2026-10-16T10:00")])
+    assert s.get_job("a")["interview"] == "2026-10-16T10:00"
+    assert s.db.execute("PRAGMA user_version").fetchone()[0] == 2
+    s.close()
+
+
 def test_schema_version(store):
     assert store.db.execute("PRAGMA user_version").fetchone()[0] == baza.SCHEMA_VERSION
 

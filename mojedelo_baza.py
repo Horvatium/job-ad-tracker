@@ -12,10 +12,13 @@ import threading
 import time
 from datetime import date
 
-STATUSES = ("new", "interesting", "applied", "waiting", "rejected")
-SCHEMA_VERSION = 1
+STATUSES = ("new", "interesting", "applied", "interview", "skipped", "turned_down")
+# statusi iz prejšnjih različic: »Čakam odgovor« je bil v praksi isto kot »Prijavljeno«, »rejected« je bil »Ni zame«
+LEGACY_STATUS = {"waiting": "applied", "rejected": "skipped"}
+SCHEMA_VERSION = 2
 ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+INTERVIEW_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$")  # datum, po želji z uro
 TEXT_FIELDS = ("url", "title", "company", "location", "type", "deadline", "salary", "notes")
 MAX_LEN = {"url": 2000, "notes": 20000}  # ostala besedila do 500 znakov
 BACKUP_RE = re.compile(r"^oglasi-\d{4}-\d{2}-\d{2}\.db$")
@@ -32,6 +35,7 @@ CREATE TABLE jobs (
     dl_approx   INTEGER NOT NULL DEFAULT 0,
     salary      TEXT NOT NULL DEFAULT '',
     status      TEXT NOT NULL DEFAULT 'new',
+    interview   TEXT NOT NULL DEFAULT '',     -- razgovor: YYYY-MM-DD ali YYYY-MM-DDTHH:MM
     star        INTEGER NOT NULL DEFAULT 0,
     notes       TEXT NOT NULL DEFAULT '',
     auto_notes  TEXT,                         -- opomba, ki jo je napisal program
@@ -82,7 +86,10 @@ def clean_job(raw):
         raise ValueError(f"oglas {jid} nima povezave")
     if out["deadline"] and not DATE_RE.match(out["deadline"]):
         out["deadline"] = ""
-    out["status"] = raw.get("status") if raw.get("status") in STATUSES else "new"
+    status = LEGACY_STATUS.get(raw.get("status"), raw.get("status"))  # npr. stare spremembe iz brskalnika
+    out["status"] = status if status in STATUSES else "new"
+    iv = str(raw.get("interview") or "")
+    out["interview"] = iv if INTERVIEW_RE.match(iv) else ""
     out["dlApprox"] = bool(raw.get("dlApprox"))
     out["star"] = bool(raw.get("star"))
     out["demo"] = bool(raw.get("demo"))
@@ -97,7 +104,7 @@ def clean_job(raw):
 
 def row_to_job(r):
     j = {k: r[k] for k in TEXT_FIELDS}
-    j.update(id=r["id"], dlApprox=bool(r["dl_approx"]), status=r["status"], star=bool(r["star"]),
+    j.update(id=r["id"], dlApprox=bool(r["dl_approx"]), status=r["status"], interview=r["interview"], star=bool(r["star"]),
              demo=bool(r["demo"]), added=r["added"], statusAt=r["status_at"], checkedAt=r["checked_at"],
              checkState=r["check_state"], checkMsg=r["check_msg"])
     if r["auto_notes"] is not None:  # brez ključa, kot v brskalniku: stran preverja »autoNotes!==undefined«
@@ -118,8 +125,13 @@ class Store:
         with self._lock, self.db:
             ver = self.db.execute("PRAGMA user_version").fetchone()[0]
             if ver < 1:
-                self.db.executescript(SCHEMA)
-            # tu bodo nadaljnje spremembe sheme: if ver < 2: ALTER TABLE …
+                self.db.executescript(SCHEMA)  # nova baza že ima zadnjo obliko
+            else:
+                if ver < 2:  # datum razgovora; »Čakam odgovor« -> »Prijavljeno«, »rejected« -> »Ni zame«
+                    self.db.execute("ALTER TABLE jobs ADD COLUMN interview TEXT NOT NULL DEFAULT ''")
+                    for old, new in LEGACY_STATUS.items():
+                        self.db.execute("UPDATE jobs SET status = ? WHERE status = ?", (new, old))
+                        self.db.execute("UPDATE status_history SET status = ? WHERE status = ?", (new, old))
             self.db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
 
     def close(self):
@@ -162,20 +174,20 @@ class Store:
         with self._lock, self.db:
             for j in jobs:
                 vals = (j["url"], j["title"], j["company"], j["location"], j["type"], j["deadline"],
-                        int(j["dlApprox"]), j["salary"], j["status"], int(j["star"]), j["notes"],
+                        int(j["dlApprox"]), j["salary"], j["status"], j["interview"], int(j["star"]), j["notes"],
                         j["autoNotes"], int(j["demo"]), j["added"], t)
                 old = self.db.execute("SELECT status FROM jobs WHERE id = ?", (j["id"],)).fetchone()
                 if old is None:
                     self.db.execute(
                         "INSERT INTO jobs (url, title, company, location, type, deadline, dl_approx, salary,"
-                        " status, star, notes, auto_notes, demo, added, updated, id, status_at)"
-                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", vals + (j["id"], t))
+                        " status, interview, star, notes, auto_notes, demo, added, updated, id, status_at)"
+                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", vals + (j["id"], t))
                     self._history(j["id"], j["status"], t)
                 else:
                     self.db.execute(
                         "UPDATE jobs SET url = ?, title = ?, company = ?, location = ?, type = ?, deadline = ?,"
-                        " dl_approx = ?, salary = ?, status = ?, star = ?, notes = ?, auto_notes = ?, demo = ?,"
-                        " added = ?, updated = ? WHERE id = ?", vals + (j["id"],))
+                        " dl_approx = ?, salary = ?, status = ?, interview = ?, star = ?, notes = ?, auto_notes = ?,"
+                        " demo = ?, added = ?, updated = ? WHERE id = ?", vals + (j["id"],))
                     if old["status"] != j["status"]:
                         self.db.execute("UPDATE jobs SET status_at = ? WHERE id = ?", (t, j["id"]))
                         self._history(j["id"], j["status"], t)

@@ -3,7 +3,8 @@ Samodejno delo pomočnika v ozadju (samo standardna knjižnica):
 
 - enkrat na dan preveri, ali so oglasi »Za pregled« in »Zanimivo« še objavljeni, in ocenjen rok
   zamenja z natančnim, ko je na voljo;
-- obvesti o rokih, ki se iztečejo v 3 dneh ali jutri (vsak opomnik samo enkrat);
+- obvesti o rokih, ki se iztečejo v 3 dneh ali jutri, in o razgovorih dan prej in na dan razgovora
+  (vsak opomnik samo enkrat);
 - obvesti, ko oglas ni več objavljen;
 - enkrat na dan naredi varnostno kopijo baze.
 
@@ -77,8 +78,35 @@ def due_reminders(store, today=None):
     return sorted(out, key=lambda x: x[1])
 
 
+def due_interviews(store, today=None):
+    """Razgovori dan prej in na dan razgovora: [(oglas, dni do razgovora)]. Vsak opomnik le enkrat."""
+    today = today or date.today()
+    out = []
+    for j in store.list_jobs():
+        if j["demo"] or j["status"] != "interview" or not j.get("interview"):
+            continue
+        days = (date.fromisoformat(j["interview"][:10]) - today).days
+        if days not in (0, 1):
+            continue
+        key = f"i{days}:{j['interview']}"  # prestavljen razgovor = nov opomnik
+        if store.was_notified(j["id"], key):
+            continue
+        store.mark_notified(j["id"], key)
+        out.append((j, days))
+    return sorted(out, key=lambda x: x[0]["interview"])
+
+
 def when(days):
     return "danes" if days == 0 else "jutri" if days == 1 else f"čez {days} dni"
+
+
+def at_time(iv):
+    return f" ob {iv[11:16]}" if len(iv) > 10 else ""
+
+
+def interview_text(items):
+    title = (f"Razgovor {when(items[0][1])}" if len(items) == 1 else f"Razgovori ({len(items)})")
+    return title, summarize([f"{name(j)} – {when(d)}{at_time(j['interview'])}" for j, d in items])
 
 
 def name(j):
@@ -261,6 +289,9 @@ class Checker:
         return True
 
     def remind(self, today=None):
+        interviews = due_interviews(self.store, today)
+        if interviews:
+            self.notify(*interview_text(interviews), self.page_url)
         items = due_reminders(self.store, today)
         if items:
             self.notify(*reminder_text(items), self.page_url)

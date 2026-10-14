@@ -92,6 +92,30 @@ def test_due_reminders(store):
     assert [j["id"] for j, _ in pr.due_reminders(store, date(2026, 10, 9))] == ["in3"]
 
 
+def test_due_interviews(store):
+    store.apply_batch([job("jutri", status="interview", interview="2026-10-08T10:00"),
+                       job("danes", status="interview", interview="2026-10-07"),
+                       job("cez2", status="interview", interview="2026-10-09T09:00"),
+                       job("brez", status="interview"),
+                       job("star", status="applied", interview="2026-10-08T10:00")])
+    assert [(j["id"], d) for j, d in pr.due_interviews(store, TODAY)] == [("danes", 0), ("jutri", 1)]
+    assert pr.due_interviews(store, TODAY) == []
+    # naslednji dan: »jutri« je danes (nov opomnik), »cez2« je jutri
+    assert [(j["id"], d) for j, d in pr.due_interviews(store, date(2026, 10, 8))] == [("jutri", 0), ("cez2", 1)]
+
+
+def test_moved_interview_means_new_reminder(store):
+    store.apply_batch([job("a", status="interview", interview="2026-10-08T10:00")])
+    assert len(pr.due_interviews(store, TODAY)) == 1
+    store.apply_batch([job("a", status="interview", interview="2026-10-08T14:00")])
+    assert len(pr.due_interviews(store, TODAY)) == 1
+
+
+def test_interview_text():
+    items = [({"title": "Prodajalec", "company": "Vrtnica d.o.o.", "interview": "2026-10-08T10:00"}, 1)]
+    assert pr.interview_text(items) == ("Razgovor jutri", "Prodajalec (Vrtnica d.o.o.) – jutri ob 10:00")
+
+
 def test_new_deadline_means_new_reminder(store):
     store.apply_batch([job("a", deadline="2026-10-08")])
     assert len(pr.due_reminders(store, TODAY)) == 1
